@@ -37,12 +37,14 @@ architecture struct of top is
   signal cpu_out : cpu_out_t := cpu_out_z;
   signal alu_in : alu_in_t := alu_in_z;
   signal alu_out : alu_out_t := alu_out_z;
+  signal sram_in : sram_in_t := sram_in_z;
+  signal sram_out : sram_out_t := sram_out_z;
 -- test
   type rom_t is array(0 to 3) of std_logic_vector(31 downto 0);
   signal rom : rom_t := (
-  	"00110000000000010000111100001111",
+  	"00110000000000010000000000000001",
 	"00000000000000000000000000100000",
-	"00000000000000000000000000100000",
+	"00000000001000100001000000100000",
 	"00000000000000000000000000100000");
 
 begin
@@ -54,12 +56,17 @@ begin
     	o => clk);
 	cpu_1 : entity work.cpu port map (clk, rst, cpu_in, cpu_out);
 	alu_1 : entity work.alu port map (clk, rst, alu_in, alu_out);
+	sram_1 : entity work.sram port map (clk, sram_in, sram_out, zd, za, xwa);
 
 	alu_in.funct <= cpu_out.funct;
 	alu_in.data_a <= cpu_out.data_a;
 	alu_in.data_b <= cpu_out.data_b;
 	cpu_in.alu_data <= alu_out.data_c;
-	cpu_in.inst_data <= "00110000000000010000111100001111";
+	cpu_in.inst_data <= rom(conv_integer(cpu_out.inst_addr)/4);
+	cpu_in.mem_data <= sram_out.data;
+	sram_in.we <= cpu_out.mem_we;
+	sram_in.data <= cpu_out.mem_data;
+	sram_in.addr <= cpu_out.mem_addr;
 
 	ZCLKMA(0) <= clk;
 	ZCLKMA(1) <= clk;
@@ -73,9 +80,4 @@ begin
 	ZZA   <= '0';
 	XFT   <= '1';
 	XZBE  <= "0000";
-	-- sram
-	ZD <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-	XWA <= '0';
-	ZA <= "00000000000000000000";
-
 end architecture;

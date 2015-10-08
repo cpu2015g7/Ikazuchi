@@ -7,22 +7,32 @@ package types is
 	type cpu_in_t is record
 		alu_data : std_logic_vector(31 downto 0);
 		inst_data : std_logic_vector(31 downto 0);
+		mem_data : std_logic_vector(31 downto 0);
 	end record;
 	constant cpu_in_z : cpu_in_t := (
 		alu_data => (others => '0'),
-		inst_data => (others => '0'));
+		inst_data => (others => '0'),
+		mem_data => (others => '0')
+	);
 
 	type cpu_out_t is record
 		inst_addr : std_logic_vector(31 downto 0);
+		mem_data : std_logic_vector(31 downto 0);
+		mem_addr : std_logic_vector(20 downto 0);
+		mem_we : std_logic;
 		funct  : std_logic_vector(5 downto 0);
 		data_a : std_logic_vector(31 downto 0);
 		data_b : std_logic_vector(31 downto 0);
 	end record;
 	constant cpu_out_z : cpu_out_t := (
 		inst_addr => (others => '0'),
+		mem_data => (others => '0'),
+		mem_addr => (others => '0'),
+		mem_we => '0',
 		funct  => (others => '0'),
 		data_a => (others => '0'),
-		data_b => (others => '0'));
+		data_b => (others => '0')
+	);
 	
 	-- alu
 	type alu_in_t is record
@@ -33,13 +43,34 @@ package types is
 	constant alu_in_z : alu_in_t := (
 		funct  => (others => '0'),
 		data_a => (others => '0'),
-		data_b => (others => '0'));
+		data_b => (others => '0')
+	);
 
 	type alu_out_t is record
 		data_c : std_logic_vector(31 downto 0);
 	end record;
 	constant alu_out_z : alu_out_t := (
-		data_c => (others => '0'));
+		data_c => (others => '0')
+	);
+
+	-- sram
+	type sram_in_t is record
+		we : std_logic;
+		data : std_logic_vector(31 downto 0);
+		addr : std_logic_vector(19 downto 0);
+	end record;
+	constant sram_in_z : sram_in_t := (
+		we => '0',
+		data => (others => '0'),
+		addr => (others => '0')
+	);
+
+	type sram_out_t is record
+		data : std_logic_vector(31 downto 0);
+	end record;
+	constant sram_out_z : sram_out_t := (
+		data => (others => '0')
+	);
 
 	-- constants
 	constant OP_ALU   : std_logic_vector(5 downto 0) := "000000";

@@ -146,7 +146,10 @@ begin
 		-- end
 		rin <= v;
 
-		cpu_out.inst_addr <= r.f.npc;
+		cpu_out.inst_addr <= "0000000000000000000000000000"&r.f.npc(3 downto 0);
+		cpu_out.mem_data <= (others => '0');
+		cpu_out.mem_addr <= (others => '0');
+		cpu_out.mem_we <= '0';
 		cpu_out.funct  <= r.d.funct;
 		cpu_out.data_a <= r.d.data_a;
 		cpu_out.data_b <= r.d.data_b;
