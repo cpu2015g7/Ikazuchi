@@ -31,12 +31,14 @@ architecture struct of cpu is
 		funct    : std_logic_vector(5 downto 0);
 		data_a   : std_logic_vector(31 downto 0);
 		data_b   : std_logic_vector(31 downto 0);
+		tx_go    : std_logic;
 --		imm      : std_logic_vector(31 downto 0);
 	end record;
 
 	type execute_reg_t is record
 		reg_c : std_logic_vector(4 downto 0);
 		alu_we   : std_logic;
+		tx_go    : std_logic;
 	end record;
 
 	type memory_reg_t is record
@@ -67,13 +69,15 @@ architecture struct of cpu is
 		reg_b => (others => '0'),
 		reg_c => (others => '0'),
 		data_a => (others => '0'),
-		data_b => (others => '0')
+		data_b => (others => '0'),
+		tx_go => '0'
 --		imm => (others => '0')
 	);
 
 	constant execute_reg_z : execute_reg_t := (
 		reg_c  => (others => '0'),
-		alu_we => '0'
+		alu_we => '0',
+		tx_go => '0'
 	);
 
 	constant memory_reg_z : memory_reg_t := (
@@ -109,9 +113,11 @@ begin
 		-- decode
 		v.d.npc := r.f.npc;
 		v.d.opcode := r.f.inst(31 downto 26);
+		v.d.tx_go := '0';
 		case v.d.opcode is
 			when OP_ALU | OP_FPU  => v.d.funct := r.f.inst(5 downto 0);
 			when OP_ADDI => v.d.funct := ALU_ADD;
+			when OP_RSB  => v.d.funct := ALU_ADD; v.d.tx_go := '1';
 			when OP_BEQ  => v.d.funct := ALU_SUB;
 			when others  => v.d.funct := ALU_ADD;
 		end case;
@@ -132,6 +138,7 @@ begin
 		-- alu
 		v.e.reg_c := r.d.reg_c;
 		v.e.alu_we := '1';
+		v.e.tx_go := r.d.tx_go;
 
 		-- memory
 		v.m.reg_c := r.e.reg_c;
@@ -146,13 +153,14 @@ begin
 		-- end
 		rin <= v;
 
-		cpu_out.inst_addr <= "0000000000000000000000000000"&r.f.npc(3 downto 0);
+		cpu_out.inst_addr <= "00000000000000000000000000"&r.f.npc(5 downto 0);
 		cpu_out.mem_data <= (others => '0');
 		cpu_out.mem_addr <= (others => '0');
 		cpu_out.mem_we <= '0';
 		cpu_out.funct  <= r.d.funct;
 		cpu_out.data_a <= r.d.data_a;
 		cpu_out.data_b <= r.d.data_b;
+		cpu_out.tx_go  <= r.e.tx_go;
 	end process;
 
 	regs : process(clk, rst) is

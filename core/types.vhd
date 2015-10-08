@@ -18,8 +18,9 @@ package types is
 	type cpu_out_t is record
 		inst_addr : std_logic_vector(31 downto 0);
 		mem_data : std_logic_vector(31 downto 0);
-		mem_addr : std_logic_vector(20 downto 0);
+		mem_addr : std_logic_vector(19 downto 0);
 		mem_we : std_logic;
+		tx_go  : std_logic;
 		funct  : std_logic_vector(5 downto 0);
 		data_a : std_logic_vector(31 downto 0);
 		data_b : std_logic_vector(31 downto 0);
@@ -29,6 +30,7 @@ package types is
 		mem_data => (others => '0'),
 		mem_addr => (others => '0'),
 		mem_we => '0',
+		tx_go => '0',
 		funct  => (others => '0'),
 		data_a => (others => '0'),
 		data_b => (others => '0')
@@ -74,9 +76,13 @@ package types is
 
 	-- constants
 	constant OP_ALU   : std_logic_vector(5 downto 0) := "000000";
-	constant OP_ADDI  : std_logic_vector(5 downto 0) := "001100";
 	constant OP_BEQ   : std_logic_vector(5 downto 0) := "000100";
 	constant OP_FPU   : std_logic_vector(5 downto 0) := "000111";
+	constant OP_ADDI  : std_logic_vector(5 downto 0) := "001100";
+	constant OP_LW    : std_logic_vector(5 downto 0) := "100011";
+	constant OP_SW    : std_logic_vector(5 downto 0) := "101011";
+	constant OP_RRB   : std_logic_vector(5 downto 0) := "111110";
+	constant OP_RSB   : std_logic_vector(5 downto 0) := "111111";
 
 	constant ALU_SLL  : std_logic_vector(5 downto 0) := "000000";
 	constant ALU_SRL  : std_logic_vector(5 downto 0) := "000010";

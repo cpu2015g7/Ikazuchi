@@ -8,7 +8,10 @@ use unisim.vcomponents.all;
 use work.types.all;
 
 entity top is
-  Port ( MCLK1 : in  std_logic;
+	generic (
+		wtime : std_logic_vector(15 downto 0) := x"1ADB"
+	);
+	port ( MCLK1 : in  std_logic;
          RS_RX : in  std_logic;
          RS_TX : out  std_logic;
 
@@ -40,12 +43,27 @@ architecture struct of top is
   signal sram_in : sram_in_t := sram_in_z;
   signal sram_out : sram_out_t := sram_out_z;
 -- test
-  type rom_t is array(0 to 3) of std_logic_vector(31 downto 0);
+  type rom_t is array(0 to 15) of std_logic_vector(31 downto 0);
   signal rom : rom_t := (
-  	"00110000000000010000000000000001",
-	"00000000000000000000000000100000",
+  	"00110000000000010000000000001001",
+	"00110000000000100000000000100110",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
 	"00000000001000100001000000100000",
-	"00000000000000000000000000100000");
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
+	"11111100000000010000000000000000",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000",
+	"00000000000000000000000000000000");
+  signal rx_data : std_logic_vector(7 downto 0) := (others => '0');
+  signal tx_data : std_logic_vector(7 downto 0) := (others => '0');
+  signal rx_go, rx_busy, tx_go, tx_busy : std_logic;
 
 begin
 	ib : IBUFG port map (
@@ -57,16 +75,20 @@ begin
 	cpu_1 : entity work.cpu port map (clk, rst, cpu_in, cpu_out);
 	alu_1 : entity work.alu port map (clk, rst, alu_in, alu_out);
 	sram_1 : entity work.sram port map (clk, sram_in, sram_out, zd, za, xwa);
+	rx_1 : entity work.rx generic map (wtime) port map(clk, rx_data, rx_go, rx_busy, RS_RX);
+	tx_1 : entity work.tx generic map (wtime) port map(clk, tx_data, tx_go, tx_busy, RS_TX);
 
 	alu_in.funct <= cpu_out.funct;
 	alu_in.data_a <= cpu_out.data_a;
 	alu_in.data_b <= cpu_out.data_b;
 	cpu_in.alu_data <= alu_out.data_c;
-	cpu_in.inst_data <= rom(conv_integer(cpu_out.inst_addr)/4);
+	cpu_in.inst_data <= rom(conv_integer(cpu_out.inst_addr(31 downto 2)));
 	cpu_in.mem_data <= sram_out.data;
-	sram_in.we <= cpu_out.mem_we;
-	sram_in.data <= cpu_out.mem_data;
-	sram_in.addr <= cpu_out.mem_addr;
+--	sram_in.we <= cpu_out.mem_we;
+--	sram_in.data <= cpu_out.mem_data;
+--	sram_in.addr <= cpu_out.mem_addr;
+	tx_data <= alu_out.data_c;
+	tx_go <= cpu_out.tx_go;
 
 	ZCLKMA(0) <= clk;
 	ZCLKMA(1) <= clk;
