@@ -1,0 +1,10 @@
+*.o
+*.coe
+*.cf
+*.old
+*.exe
+*.out
+*.txt
+*~
+*.swp
+tmp/
