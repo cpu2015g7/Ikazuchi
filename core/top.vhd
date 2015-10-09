@@ -6,6 +6,7 @@ library unisim;
 use unisim.vcomponents.all;
 
 use work.types.all;
+use work.data.all;
 
 entity top is
 	generic (
@@ -43,24 +44,7 @@ architecture struct of top is
   signal sram_in : sram_in_t := sram_in_z;
   signal sram_out : sram_out_t := sram_out_z;
 -- test
-  type rom_t is array(0 to 15) of std_logic_vector(31 downto 0);
-  signal rom : rom_t := (
-  	"00110000000000010000000000001001",
-	"00110000000000100000000000100110",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"00000000001000100001000000100000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"11111100000000010000000000000000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000",
-	"00000000000000000000000000000000");
+  signal rom : rom_t := test_prog1;
   signal rx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal tx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal rx_go, rx_busy, tx_go, tx_busy : std_logic;
@@ -87,7 +71,7 @@ begin
 --	sram_in.we <= cpu_out.mem_we;
 --	sram_in.data <= cpu_out.mem_data;
 --	sram_in.addr <= cpu_out.mem_addr;
-	tx_data <= alu_out.data_c;
+	tx_data <= alu_out.data_c(7 downto 0);
 	tx_go <= cpu_out.tx_go;
 
 	ZCLKMA(0) <= clk;

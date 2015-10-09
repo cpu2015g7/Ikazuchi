@@ -74,6 +74,8 @@ package types is
 		data => (others => '0')
 	);
 
+	type rom_t is array(0 to 255) of std_logic_vector(31 downto 0);
+
 	-- constants
 	constant OP_ALU   : std_logic_vector(5 downto 0) := "000000";
 	constant OP_BEQ   : std_logic_vector(5 downto 0) := "000100";
