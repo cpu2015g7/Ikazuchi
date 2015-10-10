@@ -44,7 +44,7 @@ architecture struct of top is
   signal sram_in : sram_in_t := sram_in_z;
   signal sram_out : sram_out_t := sram_out_z;
 -- test
-  signal rom : rom_t := test_prog2;
+  signal rom : rom_t := fib_loop;
   signal rx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal tx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal rx_go, rx_busy, tx_go, tx_busy : std_logic;
