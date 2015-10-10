@@ -54,7 +54,8 @@ void d2b(std::string &s){
 }
 
 void reg2i(std::string &s){
-	if(s == "$zero") s = "00000";
+	if(s.substr(0, 2) == "$r"){ s = s.substr(2); d2b(s, 5); }
+	else if(s == "$zero") s = "00000";
 	else if(s == "$at") s = "00001";
 	else if(s == "$v0") s = "00010";
 	else if(s == "$v1") s = "00011";
@@ -107,7 +108,9 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 	std::stringstream ss(cmd);
 	std::string op, r[3];
 	ss >> op;
-
+	if(op == "nop"){
+		return "00000000000000000000000000000000";
+	}
 	const asm_t &as = asmb[op];
 
 	for(int i = 0; i < as.v_num; i++){
@@ -133,16 +136,18 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 
 void init_setting(){
 	asmb["add"] = asm_t(3, 3, "R", "000000", "00000", "100000");
-	asmb["addi"] = asm_t(2, 3, "I", "001000", "", "");
+	asmb["addi"] = asm_t(2, 3, "I", "001100", "", "");
 	asmb["sw"] = asm_t(-2, 2, "I", "101011", "", "");
 	asmb["lw"] = asm_t(-2, 2, "I", "100011", "", "");
 	asmb["slt"] = asm_t(3, 3, "R", "000000", "00000", "101010");
-	asmb["beq"] = asm_t(2, 3, "I", "001000", "", "");
+	asmb["beq"] = asm_t(2, 3, "I", "000100", "", "");
 	asmb["sll"] = asm_t(2, 3, "R", "000000", "", "000000");
 	asmb["srl"] = asm_t(2, 3, "R", "000000", "", "000010");
 	asmb["j"] = asm_t(0, 1, "J", "000010", "", "");
+	asmb["jr"] = asm_t(1, 1, "R", "000000", "000000000000000", "001000");
 	asmb["jal"] = asm_t(0, 1, "J", "000011", "", "");
 	asmb["rsb"] = asm_t(1, 1, "I", "111111", "", "");
+	asmb["rrb"] = asm_t(1, 1, "I", "111110", "", "");
 }
 
 int run(int argc, char *argv[]){
