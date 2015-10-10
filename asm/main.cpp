@@ -128,7 +128,7 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 		if(as.r_num == 3) return as.opcd + r[1] + r[2] + r[0] + as.s1 + as.s2;
 		else return as.opcd + "00000" + r[1] + r[0] + r[2] + as.s2;
 	} else if(op == "rsb"){
-		return as.opcd + "00000" + r[0] + "0000000000000000";
+		return as.opcd + r[0] + "00000" + "0000000000000000";
 	} else if(as.form == "I") return as.opcd + r[1] + r[0] + r[2];
 	else if(as.form == "J") return as.opcd + r[0];
 	else return "";
