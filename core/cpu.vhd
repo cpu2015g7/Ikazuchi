@@ -3,6 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
 use work.types.all;
+use work.util.all;
 
 entity cpu is
 	port (
@@ -31,13 +32,15 @@ architecture struct of cpu is
 		funct    : std_logic_vector(5 downto 0);
 		data_a   : std_logic_vector(31 downto 0);
 		data_b   : std_logic_vector(31 downto 0);
+		data_c   : std_logic_vector(31 downto 0);
+		reg_we   : std_logic;
 		tx_go    : std_logic;
 --		imm      : std_logic_vector(31 downto 0);
 	end record;
 
 	type execute_reg_t is record
-		reg_c : std_logic_vector(4 downto 0);
-		alu_we   : std_logic;
+		reg_c    : std_logic_vector(4 downto 0);
+		reg_we   : std_logic;
 		tx_go    : std_logic;
 	end record;
 
@@ -70,13 +73,15 @@ architecture struct of cpu is
 		reg_c => (others => '0'),
 		data_a => (others => '0'),
 		data_b => (others => '0'),
+		data_c => (others => '0'),
+		reg_we => '0',
 		tx_go => '0'
 --		imm => (others => '0')
 	);
 
 	constant execute_reg_z : execute_reg_t := (
 		reg_c  => (others => '0'),
-		alu_we => '0',
+		reg_we => '0',
 		tx_go => '0'
 	);
 
@@ -103,10 +108,22 @@ begin
 		variable data_a : std_logic_vector(31 downto 0);
 		variable data_b : std_logic_vector(31 downto 0);
 		variable data_c : std_logic_vector(31 downto 0);
+		variable pc_src : std_logic;
+		variable pc_addr : std_logic_vector(31 downto 0);
 	begin
 		v := r;
 		-- fetch
-		v.f.pc := r.f.npc;
+		if r.d.opcode = OP_BEQ and (r.d.data_a = r.d.data_c) then
+			pc_src := '1';
+		else
+			pc_src := '0';
+		end if;
+
+		if pc_src = '0' then
+			v.f.pc := r.f.npc;
+		else
+			v.f.pc := r.d.npc + (ext(r.d.data_b(15), 14)&r.d.data_b(15 downto 0)&"00");
+		end if;
 		v.f.npc := v.f.pc + 4;
 		v.f.inst := cpu_in.inst_data;
 
@@ -129,21 +146,27 @@ begin
 			   	v.d.reg_b := r.f.inst(20 downto 16);
 				v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
 				v.d.reg_c := r.f.inst(15 downto 11);
+				v.d.data_c := (others => '0');
 			when others =>
 				v.d.reg_b := "00000";
 				v.d.data_b := x"0000"&r.f.inst(15 downto 0);
 				v.d.reg_c := r.f.inst(20 downto 16);
+				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
+		end case;
+		case v.d.opcode is
+			when OP_SW | OP_BEQ | OP_RSB => v.d.reg_we := '0';
+			when others => v.d.reg_we := '1';
 		end case;
 
 		-- alu
 		v.e.reg_c := r.d.reg_c;
-		v.e.alu_we := '1';
+		v.e.reg_we := r.d.reg_we;
 		v.e.tx_go := r.d.tx_go;
 
 		-- memory
 		v.m.reg_c := r.e.reg_c;
 		v.m.data_c := cpu_in.alu_data;
-		v.m.reg_we := r.e.alu_we;
+		v.m.reg_we := r.e.reg_we;
 
 		-- write
 		if r.m.reg_we = '1' then
@@ -153,7 +176,8 @@ begin
 		-- end
 		rin <= v;
 
-		cpu_out.inst_addr <= "00000000000000000000000000"&r.f.npc(5 downto 0);
+	--	cpu_out.inst_addr <= "00000000000000000000000000"&r.f.npc(5 downto 0);
+		cpu_out.inst_addr <= "0000000000000000000000"&r.f.npc(9 downto 0);
 		cpu_out.mem_data <= (others => '0');
 		cpu_out.mem_addr <= (others => '0');
 		cpu_out.mem_we <= '0';
