@@ -114,6 +114,11 @@ begin
 		variable pc_addr : std_logic_vector(31 downto 0);
 	begin
 		v := r;
+		-- write
+		if r.m.reg_we = '1' then
+			v.regfile(conv_integer(r.m.reg_c)) := r.m.data_c;
+		end if;
+
 		-- fetch
 		if r.d.opcode = OP_BEQ and (r.d.data_a = r.d.data_c) then
 			pc_src := '1';
@@ -124,6 +129,9 @@ begin
 		v.f.pc := r.f.npc;
 		if cpu_in.inst_data(31 downto 26) = OP_JAL then
 			v.f.npc := (r.f.npc(31 downto 28)&cpu_in.inst_data(25 downto 0)&"00");
+		elsif cpu_in.inst_data(31 downto 26) = OP_ALU and cpu_in.inst_data(5 downto 0) = FN_JR then
+			-- bug (reg_we wille be expected to '0')
+			v.f.npc := v.regfile(conv_integer(cpu_in.inst_data(25 downto 21)));
 		elsif pc_src = '0' then
 			v.f.npc := r.f.npc + 4;
 		else
@@ -176,11 +184,6 @@ begin
 		v.m.reg_c := r.e.reg_c;
 		v.m.data_c := cpu_in.alu_data;
 		v.m.reg_we := r.e.reg_we;
-
-		-- write
-		if r.m.reg_we = '1' then
-			v.regfile(conv_integer(r.m.reg_c)) := r.m.data_c;
-		end if;
 
 		-- end
 		rin <= v;
