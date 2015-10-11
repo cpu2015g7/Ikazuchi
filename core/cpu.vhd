@@ -123,26 +123,6 @@ begin
 			v.regfile(conv_integer(r.e.reg_c)) := r.e.data_c;
 		end if;
 
-		-- fetch
-		if r.d.opcode = OP_BEQ and (r.d.data_a = r.d.data_c) then
-			pc_src := '1';
-		else
-			pc_src := '0';
-		end if;
-
-		v.f.pc := r.f.npc;
-		if cpu_in.inst_data(31 downto 26) = OP_JAL then
-			v.f.npc := (r.f.npc(31 downto 28)&cpu_in.inst_data(25 downto 0)&"00");
-		elsif cpu_in.inst_data(31 downto 26) = OP_ALU and cpu_in.inst_data(5 downto 0) = FN_JR then
-			-- bug (reg_we wille be expected to '0')
-			v.f.npc := v.regfile(conv_integer(cpu_in.inst_data(25 downto 21)));
-		elsif pc_src = '1' then
-			v.f.npc := (r.d.npc + (ext(r.d.data_b(15), 14)&r.d.data_b(15 downto 0)&"00")) + 4;
-		else
-			v.f.npc := r.f.npc + 4;
-		end if;
-		v.f.inst := cpu_in.inst_data;
-
 		-- decode
 		v.d.pc := r.f.pc;
 		v.d.npc := r.f.npc;
@@ -188,6 +168,26 @@ begin
 			v.d.mem_we := '0';
 			v.d.mem_re := '0';
 		end if;
+
+		-- fetch
+		if v.d.opcode = OP_BEQ and (v.d.data_a = v.d.data_c) then
+			pc_src := '1';
+		else
+			pc_src := '0';
+		end if;
+
+		v.f.pc := r.f.npc;
+		if cpu_in.inst_data(31 downto 26) = OP_JAL then
+			v.f.npc := (r.f.npc(31 downto 28)&cpu_in.inst_data(25 downto 0)&"00");
+		elsif cpu_in.inst_data(31 downto 26) = OP_ALU and cpu_in.inst_data(5 downto 0) = FN_JR then
+			-- bug (reg_we wille be expected to '0')
+			v.f.npc := v.regfile(conv_integer(cpu_in.inst_data(25 downto 21)));
+		elsif pc_src = '1' then
+			v.f.npc := (v.d.npc + (ext(v.d.data_b(15), 14)&v.d.data_b(15 downto 0)&"00")) + 4;
+		else
+			v.f.npc := r.f.npc + 4;
+		end if;
+		v.f.inst := cpu_in.inst_data;
 
 		-- alu
 		v.e.reg_c := r.d.reg_c;

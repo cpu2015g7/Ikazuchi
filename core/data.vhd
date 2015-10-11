@@ -140,5 +140,16 @@ package data is
 		x"10000064",
 		others => (others => '0')
 );
+	constant beq_test : rom_t := (
+		x"00000000",
+		x"00000000",
+		x"00000000",
+		x"00000000",
+		x"1000FFFD",
+		x"30010001",
+		x"30020001",
+		x"00000000",
+		others => (others => '0')
+);
 
 end package;
