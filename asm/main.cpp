@@ -29,7 +29,7 @@ int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std:
 	remove_comment(cmd);
 	if(cmd[cmd.size()-1] == ':'){
 		assert(lab.count(cmd) == 0);
-		lab[cmd] = addr;
+		lab[cmd.substr(0, cmd.size()-1)] = addr/4;
 		return 0;
 	}
 
@@ -39,14 +39,19 @@ int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std:
 	return 0;
 }
 
+std::string i2b(int a, int n){
+	std::string s(n, '0');
+	for(int i = 0; i < n; i++){
+		if(1&(a>>(n-i-1))) s[i] = '1';
+	}
+	return s;
+}
+
 void d2b(std::string &s, int n){
 	std::stringstream ss(s);
 	int a;
 	ss >> a;
-	s = std::string(n, '0');
-	for(int i = 0; i < n; i++){
-		if(1&(a>>(n-i-1))) s[i] = '1';
-	}
+	s = i2b(a, n);
 }
 
 void d2b(std::string &s){
@@ -121,7 +126,7 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 		} else if(i >= as.r_num && as.form == "R"){
 			d2b(r[i], 5);
 		} else if(as.form == "J"){
-			d2b(r[i], 26);
+			r[i] = i2b(label[r[i]], 26);
 		} else (i < as.r_num ? reg2i : static_cast<void (*)(std::string &)>(d2b))(r[i]);
 	}
 	if(as.form == "R"){
