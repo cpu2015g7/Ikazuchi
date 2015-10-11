@@ -24,6 +24,7 @@ architecture struct of cpu is
 	end record;
 
 	type decode_reg_t is record
+		pc      : std_logic_vector(31 downto 0);
 		npc      : std_logic_vector(31 downto 0);
 		opcode   : std_logic_vector(5 downto 0);
 		reg_a    : std_logic_vector(4 downto 0);
@@ -65,6 +66,7 @@ architecture struct of cpu is
 	);
 
 	constant decode_reg_z : decode_reg_t := (
+		pc => (others => '0'),
 		npc => (others => '0'),
 		opcode => (others => '0'),
 		funct => (others => '0'),
@@ -119,21 +121,24 @@ begin
 			pc_src := '0';
 		end if;
 
-		if pc_src = '0' then
-			v.f.pc := r.f.npc;
+		v.f.pc := r.f.npc;
+		if cpu_in.inst_data(31 downto 26) = OP_JAL then
+			v.f.npc := (r.f.npc(31 downto 28)&cpu_in.inst_data(25 downto 0)&"00");
+		elsif pc_src = '0' then
+			v.f.npc := r.f.npc + 4;
 		else
-			v.f.pc := r.d.npc + (ext(r.d.data_b(15), 14)&r.d.data_b(15 downto 0)&"00");
+			v.f.npc := (r.d.npc + (ext(r.d.data_b(15), 14)&r.d.data_b(15 downto 0)&"00")) + 4;
 		end if;
-		v.f.npc := v.f.pc + 4;
 		v.f.inst := cpu_in.inst_data;
 
 		-- decode
+		v.d.pc := r.f.pc;
 		v.d.npc := r.f.npc;
 		v.d.opcode := r.f.inst(31 downto 26);
 		v.d.tx_go := '0';
 		case v.d.opcode is
 			when OP_ALU | OP_FPU  => v.d.funct := r.f.inst(5 downto 0);
-			when OP_ADDI => v.d.funct := ALU_ADD;
+			when OP_ADDI | OP_JAL => v.d.funct := ALU_ADD;
 			when OP_RSB  => v.d.funct := ALU_ADD; v.d.tx_go := '1';
 			when OP_BEQ  => v.d.funct := ALU_SUB;
 			when others  => v.d.funct := ALU_ADD;
@@ -146,7 +151,11 @@ begin
 			   	v.d.reg_b := r.f.inst(20 downto 16);
 				v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
 				v.d.reg_c := r.f.inst(15 downto 11);
-				v.d.data_c := (others => '0');
+--				v.d.data_c := (others => '0');
+			when OP_JAL =>
+				v.d.data_a := (others => '0');
+				v.d.data_b := v.d.pc + 4;
+				v.d.reg_c := "11111";
 			when others =>
 				v.d.reg_b := "00000";
 				v.d.data_b := x"0000"&r.f.inst(15 downto 0);

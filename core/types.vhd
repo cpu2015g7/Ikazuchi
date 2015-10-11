@@ -85,7 +85,9 @@ package types is
 	constant OP_SW    : std_logic_vector(5 downto 0) := "101011";
 	constant OP_RRB   : std_logic_vector(5 downto 0) := "111110";
 	constant OP_RSB   : std_logic_vector(5 downto 0) := "111111";
+	constant OP_JAL   : std_logic_vector(5 downto 0) := "000011";
 
+	constant FN_JR    : std_logic_vector(5 downto 0) := "001000";
 	constant ALU_SLL  : std_logic_vector(5 downto 0) := "000000";
 	constant ALU_SRL  : std_logic_vector(5 downto 0) := "000010";
 	constant ALU_ADD  : std_logic_vector(5 downto 0) := "100000";
