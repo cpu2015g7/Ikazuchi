@@ -130,7 +130,7 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 		} else (i < as.r_num ? reg2i : static_cast<void (*)(std::string &)>(d2b))(r[i]);
 	}
 	if(as.form == "R"){
-		if(as.r_num == 3) return as.opcd + r[1] + r[2] + r[0] + as.s1 + as.s2;
+		if(as.r_num == 3 || op == "jr") return as.opcd + r[1] + r[2] + r[0] + as.s1 + as.s2;
 		else return as.opcd + "00000" + r[1] + r[0] + r[2] + as.s2;
 	} else if(op == "rsb"){
 		return as.opcd + r[0] + "00000" + "0000000000000000";
