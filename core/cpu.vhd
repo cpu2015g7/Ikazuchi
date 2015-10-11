@@ -35,12 +35,14 @@ architecture struct of cpu is
 		data_b   : std_logic_vector(31 downto 0);
 		data_c   : std_logic_vector(31 downto 0);
 		reg_we   : std_logic;
+		mem_we   : std_logic;
+		mem_re   : std_logic;
 		tx_go    : std_logic;
---		imm      : std_logic_vector(31 downto 0);
 	end record;
 
 	type execute_reg_t is record
 		reg_c    : std_logic_vector(4 downto 0);
+		data_c   : std_logic_vector(31 downto 0);
 		reg_we   : std_logic;
 		tx_go    : std_logic;
 	end record;
@@ -77,12 +79,14 @@ architecture struct of cpu is
 		data_b => (others => '0'),
 		data_c => (others => '0'),
 		reg_we => '0',
+		mem_we => '0',
+		mem_re => '0',
 		tx_go => '0'
---		imm => (others => '0')
 	);
 
 	constant execute_reg_z : execute_reg_t := (
 		reg_c  => (others => '0'),
+		data_c => (others => '0'),
 		reg_we => '0',
 		tx_go => '0'
 	);
@@ -115,8 +119,8 @@ begin
 	begin
 		v := r;
 		-- write
-		if r.m.reg_we = '1' then
-			v.regfile(conv_integer(r.m.reg_c)) := r.m.data_c;
+		if r.e.reg_we = '1' then
+			v.regfile(conv_integer(r.e.reg_c)) := r.e.data_c;
 		end if;
 
 		-- fetch
@@ -132,10 +136,10 @@ begin
 		elsif cpu_in.inst_data(31 downto 26) = OP_ALU and cpu_in.inst_data(5 downto 0) = FN_JR then
 			-- bug (reg_we wille be expected to '0')
 			v.f.npc := v.regfile(conv_integer(cpu_in.inst_data(25 downto 21)));
-		elsif pc_src = '0' then
-			v.f.npc := r.f.npc + 4;
-		else
+		elsif pc_src = '1' then
 			v.f.npc := (r.d.npc + (ext(r.d.data_b(15), 14)&r.d.data_b(15 downto 0)&"00")) + 4;
+		else
+			v.f.npc := r.f.npc + 4;
 		end if;
 		v.f.inst := cpu_in.inst_data;
 
@@ -166,7 +170,7 @@ begin
 				v.d.reg_c := "11111";
 			when others =>
 				v.d.reg_b := "00000";
-				v.d.data_b := x"0000"&r.f.inst(15 downto 0);
+				v.d.data_b := ext(r.f.inst(15), 16)&r.f.inst(15 downto 0);
 				v.d.reg_c := r.f.inst(20 downto 16);
 				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
 		end case;
@@ -174,22 +178,32 @@ begin
 			when OP_SW | OP_BEQ | OP_RSB => v.d.reg_we := '0';
 			when others => v.d.reg_we := '1';
 		end case;
+		if v.d.opcode = OP_SW then
+			v.d.mem_we := '1';
+			v.d.mem_re := '0';
+		elsif v.d.opcode = OP_LW then
+			v.d.mem_we := '0';
+			v.d.mem_re := '1';
+		else
+			v.d.mem_we := '0';
+			v.d.mem_re := '0';
+		end if;
 
 		-- alu
 		v.e.reg_c := r.d.reg_c;
+		v.e.data_c := cpu_in.alu_data;
 		v.e.reg_we := r.d.reg_we;
 		v.e.tx_go := r.d.tx_go;
 
 		-- memory
 		v.m.reg_c := r.e.reg_c;
-		v.m.data_c := cpu_in.alu_data;
+		v.m.data_c := r.e.data_c;
 		v.m.reg_we := r.e.reg_we;
 
 		-- end
 		rin <= v;
 
-	--	cpu_out.inst_addr <= "00000000000000000000000000"&r.f.npc(5 downto 0);
-		cpu_out.inst_addr <= "0000000000000000000000"&r.f.npc(9 downto 0);
+		cpu_out.inst_addr <= r.f.npc;
 		cpu_out.mem_data <= (others => '0');
 		cpu_out.mem_addr <= (others => '0');
 		cpu_out.mem_we <= '0';
@@ -197,6 +211,7 @@ begin
 		cpu_out.data_a <= r.d.data_a;
 		cpu_out.data_b <= r.d.data_b;
 		cpu_out.tx_go  <= r.e.tx_go;
+		cpu_out.data_c <= r.e.data_c;
 	end process;
 
 	regs : process(clk, rst) is
