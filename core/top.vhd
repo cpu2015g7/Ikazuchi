@@ -44,7 +44,7 @@ architecture struct of top is
   signal sram_in : sram_in_t := sram_in_z;
   signal sram_out : sram_out_t := sram_out_z;
 -- test
-  signal rom : rom_t := beq_test;
+  signal rom : rom_t := fib_rec2;
   signal rx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal tx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal rx_go, rx_busy, tx_go, tx_busy : std_logic;
@@ -58,6 +58,7 @@ begin
     	o => clk);
 	cpu_1 : entity work.cpu port map (clk, rst, cpu_in, cpu_out);
 	alu_1 : entity work.alu port map (clk, rst, alu_in, alu_out);
+--	sram_1 : entity work.sram_sim port map (clk, sram_in, sram_out, zd, za, xwa);
 	sram_1 : entity work.sram port map (clk, sram_in, sram_out, zd, za, xwa);
 	rx_1 : entity work.rx generic map (wtime) port map(clk, rx_data, rx_go, rx_busy, RS_RX);
 	tx_1 : entity work.tx generic map (wtime) port map(clk, tx_data, tx_go, tx_busy, RS_TX);
@@ -69,9 +70,9 @@ begin
 	cpu_in.inst_data <= rom(conv_integer(cpu_out.inst_addr(31 downto 2)));
 	cpu_in.mem_data <= sram_out.data;
 	sram_in.we <= cpu_out.mem_we;
-	sram_in.data <= cpu_out.mem_data;
-	sram_in.addr <= cpu_out.mem_addr;
-	tx_data <= cpu_out.data_c(7 downto 0);
+	sram_in.data <= cpu_out.data_c;
+	sram_in.addr <= cpu_out.data_res(19 downto 0);
+	tx_data <= cpu_out.data_res(7 downto 0);
 	tx_go <= cpu_out.tx_go;
 
 	ZCLKMA(0) <= clk;

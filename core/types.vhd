@@ -25,6 +25,7 @@ package types is
 		data_a : std_logic_vector(31 downto 0);
 		data_b : std_logic_vector(31 downto 0);
 		data_c : std_logic_vector(31 downto 0);
+		data_res : std_logic_vector(31 downto 0);
 	end record;
 	constant cpu_out_z : cpu_out_t := (
 		inst_addr => (others => '0'),
@@ -35,7 +36,8 @@ package types is
 		funct  => (others => '0'),
 		data_a => (others => '0'),
 		data_b => (others => '0'),
-		data_c => (others => '0')
+		data_c => (others => '0'),
+		data_res => (others => '0')
 	);
 	
 	-- alu
@@ -94,4 +96,5 @@ package types is
 	constant ALU_SRL  : std_logic_vector(5 downto 0) := "000010";
 	constant ALU_ADD  : std_logic_vector(5 downto 0) := "100000";
 	constant ALU_SUB  : std_logic_vector(5 downto 0) := "100010";
+	constant ALU_SLT  : std_logic_vector(5 downto 0) := "101010";
 end package;

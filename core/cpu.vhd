@@ -43,14 +43,19 @@ architecture struct of cpu is
 	type execute_reg_t is record
 		reg_c    : std_logic_vector(4 downto 0);
 		data_c   : std_logic_vector(31 downto 0);
+		data_res   : std_logic_vector(31 downto 0);
 		reg_we   : std_logic;
+		mem_we   : std_logic;
+		mem_re   : std_logic;
 		tx_go    : std_logic;
 	end record;
 
 	type memory_reg_t is record
 		data_c : std_logic_vector(31 downto 0);
 		reg_c  : std_logic_vector(4 downto 0);
-		reg_we : std_logic;
+		reg_c1  : std_logic_vector(4 downto 0);
+		mem_re : std_logic;
+		mem_re1 : std_logic;
 	end record;
 
 	type reg_t is record
@@ -87,14 +92,19 @@ architecture struct of cpu is
 	constant execute_reg_z : execute_reg_t := (
 		reg_c  => (others => '0'),
 		data_c => (others => '0'),
+		data_res => (others => '0'),
 		reg_we => '0',
+		mem_we => '0',
+		mem_re => '0',
 		tx_go => '0'
 	);
 
 	constant memory_reg_z : memory_reg_t := (
 		data_c => (others => '0'),
 		reg_c => (others => '0'),
-		reg_we => '0'
+		reg_c1 => (others => '0'),
+		mem_re => '0',
+		mem_re1 => '0'
 	);
 
 	constant reg_z : reg_t := (
@@ -120,21 +130,26 @@ begin
 		v := r;
 		-- write
 		if r.e.reg_we = '1' then
-			v.regfile(conv_integer(r.e.reg_c)) := r.e.data_c;
+			v.regfile(conv_integer(r.e.reg_c)) := r.e.data_res;
 		end if;
 
 		-- decode
 		v.d.pc := r.f.pc;
 		v.d.npc := r.f.npc;
 		v.d.opcode := r.f.inst(31 downto 26);
-		v.d.tx_go := '0';
 		case v.d.opcode is
 			when OP_ALU | OP_FPU  => v.d.funct := r.f.inst(5 downto 0);
-			when OP_ADDI | OP_JAL => v.d.funct := ALU_ADD;
-			when OP_RSB  => v.d.funct := ALU_ADD; v.d.tx_go := '1';
+			when OP_ADDI | OP_JAL | OP_SW | OP_LW => v.d.funct := ALU_ADD;
+			when OP_RSB  => v.d.funct := ALU_ADD;
 			when OP_BEQ  => v.d.funct := ALU_SUB;
 			when others  => v.d.funct := ALU_ADD;
 		end case;
+
+		if v.d.opcode = OP_RSB then
+			v.d.tx_go := '1';
+		else
+			v.d.tx_go := '0';
+		end if;
 
 		v.d.reg_a := r.f.inst(25 downto 21);
 		v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
@@ -155,7 +170,7 @@ begin
 				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
 		end case;
 		case v.d.opcode is
-			when OP_SW | OP_BEQ | OP_RSB => v.d.reg_we := '0';
+			when OP_SW | OP_LW | OP_BEQ | OP_RSB => v.d.reg_we := '0';
 			when others => v.d.reg_we := '1';
 		end case;
 		if v.d.opcode = OP_SW then
@@ -180,10 +195,10 @@ begin
 		if cpu_in.inst_data(31 downto 26) = OP_JAL then
 			v.f.npc := (r.f.npc(31 downto 28)&cpu_in.inst_data(25 downto 0)&"00");
 		elsif cpu_in.inst_data(31 downto 26) = OP_ALU and cpu_in.inst_data(5 downto 0) = FN_JR then
-			-- bug (reg_we wille be expected to '0')
+			-- bug (reg_we will be expected to '0')
 			v.f.npc := v.regfile(conv_integer(cpu_in.inst_data(25 downto 21)));
 		elsif pc_src = '1' then
-			v.f.npc := (v.d.npc + (ext(v.d.data_b(15), 14)&v.d.data_b(15 downto 0)&"00")) + 4;
+			v.f.npc := (v.d.pc + (ext(v.d.data_b(15), 14)&v.d.data_b(15 downto 0)&"00")) + 4;
 		else
 			v.f.npc := r.f.npc + 4;
 		end if;
@@ -191,27 +206,41 @@ begin
 
 		-- alu
 		v.e.reg_c := r.d.reg_c;
-		v.e.data_c := cpu_in.alu_data;
+		v.e.data_c := r.d.data_c;
+		v.e.data_res := cpu_in.alu_data;
 		v.e.reg_we := r.d.reg_we;
+		v.e.mem_we := r.d.mem_we;
+		v.e.mem_re := r.d.mem_re;
 		v.e.tx_go := r.d.tx_go;
 
 		-- memory
 		v.m.reg_c := r.e.reg_c;
-		v.m.data_c := r.e.data_c;
-		v.m.reg_we := r.e.reg_we;
+		v.m.reg_c1 := r.m.reg_c;
+--		v.m.reg_c2 := r.m.reg_c1;
+		v.m.mem_re := r.e.mem_re;
+		v.m.mem_re1 := r.m.mem_re;
+--		v.m.mem_re2 := r.m.mem_re1;
+--		v.m.data_res := cpu_in.mem_data;
+		if r.m.mem_re1 = '1' then
+			v.regfile(conv_integer(r.m.reg_c1)) := cpu_in.mem_data;
+		end if;
+--		v.m.data_c := r.e.data_c;
+--		v.m.reg_we := r.e.reg_we;
 
 		-- end
 		rin <= v;
 
 		cpu_out.inst_addr <= r.f.npc;
-		cpu_out.mem_data <= (others => '0');
-		cpu_out.mem_addr <= (others => '0');
+--		cpu_out.mem_data <= (others => '0');
+--		cpu_out.mem_addr <= (others => '0');
 		cpu_out.mem_we <= '0';
 		cpu_out.funct  <= r.d.funct;
 		cpu_out.data_a <= r.d.data_a;
 		cpu_out.data_b <= r.d.data_b;
 		cpu_out.tx_go  <= r.e.tx_go;
 		cpu_out.data_c <= r.e.data_c;
+		cpu_out.data_res <= r.e.data_res;
+		cpu_out.mem_we <= r.e.mem_we;
 	end process;
 
 	regs : process(clk, rst) is
