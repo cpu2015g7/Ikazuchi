@@ -216,23 +216,16 @@ begin
 		-- memory
 		v.m.reg_c := r.e.reg_c;
 		v.m.reg_c1 := r.m.reg_c;
---		v.m.reg_c2 := r.m.reg_c1;
 		v.m.mem_re := r.e.mem_re;
 		v.m.mem_re1 := r.m.mem_re;
---		v.m.mem_re2 := r.m.mem_re1;
---		v.m.data_res := cpu_in.mem_data;
 		if r.m.mem_re1 = '1' then
 			v.regfile(conv_integer(r.m.reg_c1)) := cpu_in.mem_data;
 		end if;
---		v.m.data_c := r.e.data_c;
---		v.m.reg_we := r.e.reg_we;
 
 		-- end
 		rin <= v;
 
 		cpu_out.inst_addr <= r.f.npc;
---		cpu_out.mem_data <= (others => '0');
---		cpu_out.mem_addr <= (others => '0');
 		cpu_out.mem_we <= '0';
 		cpu_out.funct  <= r.d.funct;
 		cpu_out.data_a <= r.d.data_a;

@@ -17,8 +17,6 @@ package types is
 
 	type cpu_out_t is record
 		inst_addr : std_logic_vector(31 downto 0);
-		mem_data : std_logic_vector(31 downto 0);
-		mem_addr : std_logic_vector(19 downto 0);
 		mem_we : std_logic;
 		tx_go  : std_logic;
 		funct  : std_logic_vector(5 downto 0);
@@ -29,8 +27,6 @@ package types is
 	end record;
 	constant cpu_out_z : cpu_out_t := (
 		inst_addr => (others => '0'),
-		mem_data => (others => '0'),
-		mem_addr => (others => '0'),
 		mem_we => '0',
 		tx_go => '0',
 		funct  => (others => '0'),
