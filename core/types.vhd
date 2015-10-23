@@ -5,11 +5,15 @@ use ieee.numeric_std.all;
 package types is
 	-- cpu
 	type cpu_in_t is record
+		stall : std_logic;
+		rx_data : std_logic_vector(7 downto 0);
 		alu_data : std_logic_vector(31 downto 0);
 		inst_data : std_logic_vector(31 downto 0);
 		mem_data : std_logic_vector(31 downto 0);
 	end record;
 	constant cpu_in_z : cpu_in_t := (
+		stall => '0',
+		rx_data => (others => '0'),
 		alu_data => (others => '0'),
 		inst_data => (others => '0'),
 		mem_data => (others => '0')
@@ -19,6 +23,7 @@ package types is
 		inst_addr : std_logic_vector(31 downto 0);
 		mem_we : std_logic;
 		tx_go  : std_logic;
+		rx_go  : std_logic;
 		funct  : std_logic_vector(5 downto 0);
 		data_a : std_logic_vector(31 downto 0);
 		data_b : std_logic_vector(31 downto 0);
@@ -29,6 +34,7 @@ package types is
 		inst_addr => (others => '0'),
 		mem_we => '0',
 		tx_go => '0',
+		rx_go => '0',
 		funct  => (others => '0'),
 		data_a => (others => '0'),
 		data_b => (others => '0'),

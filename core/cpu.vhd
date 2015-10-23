@@ -38,6 +38,7 @@ architecture struct of cpu is
 		mem_we   : std_logic;
 		mem_re   : std_logic;
 		tx_go    : std_logic;
+		rx_go    : std_logic;
 	end record;
 
 	type execute_reg_t is record
@@ -48,6 +49,7 @@ architecture struct of cpu is
 		mem_we   : std_logic;
 		mem_re   : std_logic;
 		tx_go    : std_logic;
+		rx_go    : std_logic;
 	end record;
 
 	type memory_reg_t is record
@@ -86,7 +88,8 @@ architecture struct of cpu is
 		reg_we => '0',
 		mem_we => '0',
 		mem_re => '0',
-		tx_go => '0'
+		tx_go => '0',
+		rx_go => '0'
 	);
 
 	constant execute_reg_z : execute_reg_t := (
@@ -96,7 +99,8 @@ architecture struct of cpu is
 		reg_we => '0',
 		mem_we => '0',
 		mem_re => '0',
-		tx_go => '0'
+		tx_go => '0',
+		rx_go => '0'
 	);
 
 	constant memory_reg_z : memory_reg_t := (
@@ -126,8 +130,10 @@ begin
 		variable data_c : std_logic_vector(31 downto 0);
 		variable pc_src : std_logic;
 		variable pc_addr : std_logic_vector(31 downto 0);
+		variable stall : std_logic;
 	begin
 		v := r;
+		stall := cpu_in.stall;
 		-- write
 		if r.e.reg_we = '1' then
 			v.regfile(conv_integer(r.e.reg_c)) := r.e.data_res;
@@ -150,6 +156,11 @@ begin
 		else
 			v.d.tx_go := '0';
 		end if;
+		if v.d.opcode = OP_RRB then
+			v.d.rx_go := '1';
+		else
+			v.d.rx_go := '0';
+		end if;
 
 		v.d.reg_a := r.f.inst(25 downto 21);
 		v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
@@ -170,7 +181,7 @@ begin
 				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
 		end case;
 		case v.d.opcode is
-			when OP_SW | OP_LW | OP_BEQ | OP_RSB => v.d.reg_we := '0';
+			when OP_SW | OP_LW | OP_BEQ | OP_RSB | OP_RRB => v.d.reg_we := '0';
 			when others => v.d.reg_we := '1';
 		end case;
 		if v.d.opcode = OP_SW then
@@ -212,6 +223,7 @@ begin
 		v.e.mem_we := r.d.mem_we;
 		v.e.mem_re := r.d.mem_re;
 		v.e.tx_go := r.d.tx_go;
+		v.e.rx_go := r.d.rx_go;
 
 		-- memory
 		v.m.reg_c := r.e.reg_c;
@@ -221,8 +233,14 @@ begin
 		if r.m.mem_re1 = '1' then
 			v.regfile(conv_integer(r.m.reg_c1)) := cpu_in.mem_data;
 		end if;
+		if r.e.rx_go = '1' then
+			v.regfile(conv_integer(r.e.reg_c))(7 downto 0) := cpu_in.rx_data;
+		end if;
 
 		-- end
+		if stall = '1' then
+			v := r;
+		end if;
 		rin <= v;
 
 		cpu_out.inst_addr <= r.f.npc;
@@ -231,6 +249,7 @@ begin
 		cpu_out.data_a <= r.d.data_a;
 		cpu_out.data_b <= r.d.data_b;
 		cpu_out.tx_go  <= r.e.tx_go;
+		cpu_out.rx_go  <= r.e.rx_go;
 		cpu_out.data_c <= r.e.data_c;
 		cpu_out.data_res <= r.e.data_res;
 		cpu_out.mem_we <= r.e.mem_we;

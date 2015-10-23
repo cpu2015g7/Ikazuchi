@@ -15,15 +15,18 @@ end entity;
 architecture struct of rx is
 	signal count : std_logic_vector(15 downto 0) := (others => '0');
 	signal buf   : std_logic_vector(7 downto 0) := (others => '1');
-	signal state : integer range -1 to 9 := 0;
-	signal rxb   : std_logic;
+	signal state : integer range -1 to 9 := -1;
+	signal rxb   : std_logic := '1';
 begin
 	statemachine : process(clk)
-		variable r : std_logic;
+		variable r : std_logic := '0';
 	begin
+		data <= buf;
 		if rising_edge(clk) then
 			rxb <= rs_rx;
-			r := '0';
+			if done = '1' then
+				r := '0';
+			end if;
 			case state is
 				when -1 =>
 					if rxb = '0' then
@@ -36,7 +39,6 @@ begin
 						state <= state-1;
 						if state = 0 then
 							count <= "0"&wtime(14 downto 0);
-							data <= buf;
 							r := '1';
 						else
 							count <= wtime;
