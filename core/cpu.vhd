@@ -164,6 +164,12 @@ begin
 
 		v.d.reg_a := r.f.inst(25 downto 21);
 		v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
+		case v.d.funct is
+			when ALU_SLL | ALU_SRL =>
+				v.d.reg_a := (others => '0');
+				v.d.data_a := ext('0', 27)&r.f.inst(10 downto 6);
+			when others =>
+		end case;
 		case v.d.opcode is
 			when OP_ALU | OP_FPU =>
 			   	v.d.reg_b := r.f.inst(20 downto 16);
