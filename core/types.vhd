@@ -10,18 +10,21 @@ package types is
 		alu_data : std_logic_vector(31 downto 0);
 		inst_data : std_logic_vector(31 downto 0);
 		mem_data : std_logic_vector(31 downto 0);
+		fpu_data : std_logic_vector(31 downto 0);
 	end record;
 	constant cpu_in_z : cpu_in_t := (
 		stall => '0',
 		rx_data => (others => '0'),
 		alu_data => (others => '0'),
 		inst_data => (others => '0'),
-		mem_data => (others => '0')
+		mem_data => (others => '0'),
+		fpu_data => (others => '0')
 	);
 
 	type cpu_out_t is record
 		inst_addr : std_logic_vector(31 downto 0);
 		mem_we : std_logic;
+		fpu_en : std_logic;
 		tx_go  : std_logic;
 		rx_go  : std_logic;
 		funct  : std_logic_vector(5 downto 0);
@@ -33,6 +36,7 @@ package types is
 	constant cpu_out_z : cpu_out_t := (
 		inst_addr => (others => '0'),
 		mem_we => '0',
+		fpu_en => '0',
 		tx_go => '0',
 		rx_go => '0',
 		funct  => (others => '0'),
@@ -61,6 +65,27 @@ package types is
 		data_c => (others => '0')
 	);
 
+	-- fpu
+	type fpu_in_t is record
+		funct  : std_logic_vector(5 downto 0);
+		data_a : std_logic_vector(31 downto 0);
+		data_b : std_logic_vector(31 downto 0);
+		enable : std_logic;
+	end record;
+	constant fpu_in_z : fpu_in_t := (
+		funct  => (others => '0'),
+		data_a => (others => '0'),
+		data_b => (others => '0'),
+		enable => '0'
+	);
+
+	type fpu_out_t is record
+		data_c : std_logic_vector(31 downto 0);
+	end record;
+	constant fpu_out_z : fpu_out_t := (
+		data_c => (others => '0')
+	);
+
 	-- sram
 	type sram_in_t is record
 		we : std_logic;
@@ -84,19 +109,28 @@ package types is
 
 	-- constants
 	constant OP_ALU   : std_logic_vector(5 downto 0) := "000000";
+	constant OP_JAL   : std_logic_vector(5 downto 0) := "000011";
 	constant OP_BEQ   : std_logic_vector(5 downto 0) := "000100";
-	constant OP_FPU   : std_logic_vector(5 downto 0) := "000111";
+	constant OP_FPU   : std_logic_vector(5 downto 0) := "001011";
 	constant OP_ADDI  : std_logic_vector(5 downto 0) := "001100";
+	constant OP_ORI   : std_logic_vector(5 downto 0) := "001101";
 	constant OP_LW    : std_logic_vector(5 downto 0) := "100011";
 	constant OP_SW    : std_logic_vector(5 downto 0) := "101011";
 	constant OP_RRB   : std_logic_vector(5 downto 0) := "111110";
 	constant OP_RSB   : std_logic_vector(5 downto 0) := "111111";
-	constant OP_JAL   : std_logic_vector(5 downto 0) := "000011";
 
 	constant FN_JR    : std_logic_vector(5 downto 0) := "001000";
 	constant ALU_SLL  : std_logic_vector(5 downto 0) := "000000";
 	constant ALU_SRL  : std_logic_vector(5 downto 0) := "000010";
 	constant ALU_ADD  : std_logic_vector(5 downto 0) := "100000";
 	constant ALU_SUB  : std_logic_vector(5 downto 0) := "100010";
+	constant ALU_OR   : std_logic_vector(5 downto 0) := "100101";
 	constant ALU_SLT  : std_logic_vector(5 downto 0) := "101010";
+	constant ALU_FSLT : std_logic_vector(5 downto 0) := "101011";
+	
+	constant FPU_FADD : std_logic_vector(5 downto 0) := "100000";
+	constant FPU_FMUL : std_logic_vector(5 downto 0) := "000010";
+	constant FPU_FINV : std_logic_vector(5 downto 0) := "000011";
+	constant FPU_F2i  : std_logic_vector(5 downto 0) := "001000";
+	constant FPU_FSQRT: std_logic_vector(5 downto 0) := "011000";
 end package;

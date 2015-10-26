@@ -35,6 +35,7 @@ architecture struct of cpu is
 		data_b   : std_logic_vector(31 downto 0);
 		data_c   : std_logic_vector(31 downto 0);
 		reg_we   : std_logic;
+		fpu_we   : std_logic;
 		mem_we   : std_logic;
 		mem_re   : std_logic;
 		tx_go    : std_logic;
@@ -46,6 +47,7 @@ architecture struct of cpu is
 		data_c   : std_logic_vector(31 downto 0);
 		data_res   : std_logic_vector(31 downto 0);
 		reg_we   : std_logic;
+		fpu_we   : std_logic;
 		mem_we   : std_logic;
 		mem_re   : std_logic;
 		tx_go    : std_logic;
@@ -58,6 +60,8 @@ architecture struct of cpu is
 		reg_c1  : std_logic_vector(4 downto 0);
 		mem_re : std_logic;
 		mem_re1 : std_logic;
+		fpu_we : std_logic;
+		fpu_we1 : std_logic;
 	end record;
 
 	type reg_t is record
@@ -86,6 +90,7 @@ architecture struct of cpu is
 		data_b => (others => '0'),
 		data_c => (others => '0'),
 		reg_we => '0',
+		fpu_we => '0',
 		mem_we => '0',
 		mem_re => '0',
 		tx_go => '0',
@@ -97,6 +102,7 @@ architecture struct of cpu is
 		data_c => (others => '0'),
 		data_res => (others => '0'),
 		reg_we => '0',
+		fpu_we => '0',
 		mem_we => '0',
 		mem_re => '0',
 		tx_go => '0',
@@ -108,7 +114,9 @@ architecture struct of cpu is
 		reg_c => (others => '0'),
 		reg_c1 => (others => '0'),
 		mem_re => '0',
-		mem_re1 => '0'
+		mem_re1 => '0',
+		fpu_we => '0',
+		fpu_we1 => '0'
 	);
 
 	constant reg_z : reg_t := (
@@ -146,6 +154,7 @@ begin
 		case v.d.opcode is
 			when OP_ALU | OP_FPU  => v.d.funct := r.f.inst(5 downto 0);
 			when OP_ADDI | OP_JAL | OP_SW | OP_LW => v.d.funct := ALU_ADD;
+			when OP_ORI  => v.d.funct := ALU_OR;
 			when OP_RSB  => v.d.funct := ALU_ADD;
 			when OP_BEQ  => v.d.funct := ALU_SUB;
 			when others  => v.d.funct := ALU_ADD;
@@ -187,8 +196,12 @@ begin
 				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
 		end case;
 		case v.d.opcode is
-			when OP_SW | OP_LW | OP_BEQ | OP_RSB | OP_RRB => v.d.reg_we := '0';
+			when OP_FPU | OP_SW | OP_LW | OP_BEQ | OP_RSB | OP_RRB => v.d.reg_we := '0';
 			when others => v.d.reg_we := '1';
+		end case;
+		case v.d.opcode is
+			when OP_FPU => v.d.fpu_we := '1';
+			when others => v.d.fpu_we := '0';
 		end case;
 		if v.d.opcode = OP_SW then
 			v.d.mem_we := '1';
@@ -226,6 +239,7 @@ begin
 		v.e.data_c := r.d.data_c;
 		v.e.data_res := cpu_in.alu_data;
 		v.e.reg_we := r.d.reg_we;
+		v.e.fpu_we := r.d.fpu_we;
 		v.e.mem_we := r.d.mem_we;
 		v.e.mem_re := r.d.mem_re;
 		v.e.tx_go := r.d.tx_go;
@@ -239,10 +253,14 @@ begin
 		if r.m.mem_re1 = '1' then
 			v.regfile(conv_integer(r.m.reg_c1)) := cpu_in.mem_data;
 		end if;
+		v.m.fpu_we := r.e.fpu_we;
+		v.m.fpu_we1 := r.m.fpu_we;
+		if r.m.fpu_we1 = '1' then
+			v.regfile(conv_integer(r.m.reg_c1)) := cpu_in.fpu_data;
+		end if;
 		if r.e.rx_go = '1' then
 			v.regfile(conv_integer(r.e.reg_c))(7 downto 0) := cpu_in.rx_data;
 		end if;
-
 		-- end
 		if stall = '1' then
 			v := r;
@@ -254,6 +272,7 @@ begin
 		cpu_out.funct  <= r.d.funct;
 		cpu_out.data_a <= r.d.data_a;
 		cpu_out.data_b <= r.d.data_b;
+		cpu_out.fpu_en <= r.d.fpu_we;
 		cpu_out.tx_go  <= r.e.tx_go;
 		cpu_out.rx_go  <= r.e.rx_go;
 		cpu_out.data_c <= r.e.data_c;

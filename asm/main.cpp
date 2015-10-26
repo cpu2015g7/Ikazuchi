@@ -144,9 +144,12 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 void init_setting(){
 	asmb["add"] = asm_t(3, 3, "R", "000000", "00000", "100000");
 	asmb["addi"] = asm_t(2, 3, "I", "001100", "", "");
+	asmb["sub"] = asm_t(3, 3, "R", "000000", "00000", "100010");
+	asmb["ori"] = asm_t(2, 3, "I", "001101", "", "");
 	asmb["sw"] = asm_t(-2, 2, "I", "101011", "", "");
 	asmb["lw"] = asm_t(-2, 2, "I", "100011", "", "");
 	asmb["slt"] = asm_t(3, 3, "R", "000000", "00000", "101010");
+	asmb["fslt"] = asm_t(3, 3, "R", "000000", "00000", "101011");
 	asmb["beq"] = asm_t(2, 3, "I", "000100", "", "");
 	asmb["sll"] = asm_t(2, 3, "R", "000000", "", "000000");
 	asmb["srl"] = asm_t(2, 3, "R", "000000", "", "000010");
@@ -155,6 +158,11 @@ void init_setting(){
 	asmb["jal"] = asm_t(0, 1, "J", "000011", "", "");
 	asmb["rsb"] = asm_t(1, 1, "I", "111111", "", "");
 	asmb["rrb"] = asm_t(1, 1, "I", "111110", "", "");
+	asmb["fadd"] = asm_t(3, 3, "R", "001011", "00000", "100000");
+	asmb["fmul"] = asm_t(3, 3, "R", "001011", "00000", "000010");
+	asmb["finv"] = asm_t(3, 3, "R", "001011", "00000", "000011");
+	asmb["f2i"] = asm_t(3, 3, "R", "001011", "00000", "001000");
+	asmb["fsqrt"] = asm_t(3, 3, "R", "001011", "00000", "011000");
 }
 
 int run(int argc, char *argv[]){

@@ -103,6 +103,12 @@ begin
 			  	else
 				   	c := x"00000000";
 				end if;
+			when ALU_FSLT =>
+				if a(31)>b(31) or (a(31)=b(31) and (a(31)='1' xor a(30 downto 0)<b(30 downto 0))) then
+					c := x"00000001";
+				else
+					c := x"00000000";
+				end if;
 			when others => c := x"00000000";
 		end case;
 
