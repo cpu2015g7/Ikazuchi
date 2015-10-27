@@ -25,6 +25,7 @@ begin
 		case alu_in.funct is
 			when ALU_ADD => c := a + b;
 			when ALU_SUB => c := a - b;
+			when ALU_OR  => c := a or b;
 			when ALU_SLL =>
 				case a(4 downto 0) is
 					when "00000" => c := b;

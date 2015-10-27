@@ -191,7 +191,11 @@ begin
 				v.d.reg_c := "11111";
 			when others =>
 				v.d.reg_b := "00000";
-				v.d.data_b := ext(r.f.inst(15), 16)&r.f.inst(15 downto 0);
+				if v.d.opcode = OP_ORI then
+					v.d.data_b := ext('0', 16)&r.f.inst(15 downto 0);
+				else
+					v.d.data_b := ext(r.f.inst(15), 16)&r.f.inst(15 downto 0);
+				end if;
 				v.d.reg_c := r.f.inst(20 downto 16);
 				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
 		end case;
