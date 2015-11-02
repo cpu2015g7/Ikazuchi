@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <vector>
 #include <string>
 #include <assert.h>
@@ -16,6 +17,8 @@ struct asm_t {
 
 std::map<std::string, std::string> reg;
 std::map<std::string, asm_t> asmb;
+std::set<std::string> nops;
+bool dump_enable = true;
 
 void remove_comment(std::string &cmd){
 	for(int i = 0; i < cmd.size(); i++) if(cmd[i] == '#') {cmd = cmd.substr(0, i); break;};
@@ -23,6 +26,31 @@ void remove_comment(std::string &cmd){
 
 void remove_comma(std::string &cmd){
 	for(int i = 0; i < cmd.size(); i++) if(cmd[i] == ',') cmd[i] = ' ';
+}
+
+void remove_spaces(std::string &cmd){
+	while(!cmd.empty()){
+		if(cmd[0] == ' ' || cmd[0] == '\t') cmd.erase(0, 1);
+		else return;
+	}
+}
+
+void push_nop(std::vector<std::string> &s, int &addr, int n){
+	while(n--) s.push_back("nop");
+	addr += 4*n;
+}
+
+int num_nop(std::string &s){
+	if(s == "nop") return 0;
+	if(nops.find(s)==nops.end()) return 1;
+	else return 4;
+}
+
+std::string get_op(std::string &s){
+	std::string res;
+	std::stringstream ss(s);
+	ss>>res;
+	return res;
 }
 
 int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std::vector<std::string> &inst){
@@ -33,9 +61,12 @@ int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std:
 		return 0;
 	}
 
+	remove_spaces(cmd);
 	remove_comma(cmd);
 	inst.push_back(cmd);
 	addr += 4;
+	std::string op = get_op(cmd);
+	push_nop(inst, addr, num_nop(op));
 	return 0;
 }
 
@@ -159,10 +190,12 @@ void init_setting(){
 	asmb["rsb"] = asm_t(1, 1, "I", "111111", "", "");
 	asmb["rrb"] = asm_t(1, 1, "I", "111110", "", "");
 	asmb["fadd"] = asm_t(3, 3, "R", "001011", "00000", "100000");
-	asmb["fmul"] = asm_t(3, 3, "R", "001011", "00000", "000010");
+	asmb["fmul"] = asm_t(3, 3, "R", "001011", "00000", "000001");
 	asmb["finv"] = asm_t(3, 3, "R", "001011", "00000", "000011");
 	asmb["f2i"] = asm_t(3, 3, "R", "001011", "00000", "001000");
 	asmb["fsqrt"] = asm_t(3, 3, "R", "001011", "00000", "011000");
+
+	nops = std::set<std::string>({"lw", "sw", "rsb", "rrb", "fadd", "fmul", "finv", "f2i", "fsqrt"});
 }
 
 int run(int argc, char *argv[]){
@@ -182,6 +215,7 @@ int run(int argc, char *argv[]){
 		init_inst(command, addr, label, inst);
 	}
 	for(int i = 0; i < inst.size(); i++){
+		if(dump_enable) std::cerr << assemble(inst[i], i*4, label) + " # " + inst[i] << std::endl;
 		fout << assemble(inst[i], i*4, label) + "\n";
 	}
 	return 0;
