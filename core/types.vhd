@@ -111,6 +111,7 @@ package types is
 	constant OP_ALU   : std_logic_vector(5 downto 0) := "000000";
 	constant OP_JAL   : std_logic_vector(5 downto 0) := "000011";
 	constant OP_BEQ   : std_logic_vector(5 downto 0) := "000100";
+	constant OP_BNE   : std_logic_vector(5 downto 0) := "000101";
 	constant OP_FPU   : std_logic_vector(5 downto 0) := "001011";
 	constant OP_ADDI  : std_logic_vector(5 downto 0) := "001100";
 	constant OP_ORI   : std_logic_vector(5 downto 0) := "001101";
@@ -129,7 +130,7 @@ package types is
 	constant ALU_FSLT : std_logic_vector(5 downto 0) := "101011";
 	
 	constant FPU_FADD : std_logic_vector(5 downto 0) := "100000";
-	constant FPU_FMUL : std_logic_vector(5 downto 0) := "000010";
+	constant FPU_FMUL : std_logic_vector(5 downto 0) := "000001";
 	constant FPU_FINV : std_logic_vector(5 downto 0) := "000011";
 	constant FPU_F2i  : std_logic_vector(5 downto 0) := "001000";
 	constant FPU_FSQRT: std_logic_vector(5 downto 0) := "011000";

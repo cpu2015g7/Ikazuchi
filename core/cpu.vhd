@@ -156,7 +156,7 @@ begin
 			when OP_ADDI | OP_JAL | OP_SW | OP_LW => v.d.funct := ALU_ADD;
 			when OP_ORI  => v.d.funct := ALU_OR;
 			when OP_RSB  => v.d.funct := ALU_ADD;
-			when OP_BEQ  => v.d.funct := ALU_SUB;
+			when OP_BEQ | OP_BNE  => v.d.funct := ALU_SUB;
 			when others  => v.d.funct := ALU_ADD;
 		end case;
 
@@ -184,7 +184,7 @@ begin
 			   	v.d.reg_b := r.f.inst(20 downto 16);
 				v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
 				v.d.reg_c := r.f.inst(15 downto 11);
---				v.d.data_c := (others => '0');
+				v.d.data_c := (others => '0');
 			when OP_JAL =>
 				v.d.data_a := (others => '0');
 				v.d.data_b := v.d.pc + 4;
@@ -200,7 +200,7 @@ begin
 				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
 		end case;
 		case v.d.opcode is
-			when OP_FPU | OP_SW | OP_LW | OP_BEQ | OP_RSB | OP_RRB => v.d.reg_we := '0';
+			when OP_FPU | OP_SW | OP_LW | OP_BEQ | OP_BNE | OP_RSB | OP_RRB => v.d.reg_we := '0';
 			when others => v.d.reg_we := '1';
 		end case;
 		case v.d.opcode is
@@ -219,7 +219,7 @@ begin
 		end if;
 
 		-- fetch
-		if v.d.opcode = OP_BEQ and (v.d.data_a = v.d.data_c) then
+		if (v.d.opcode = OP_BEQ and (v.d.data_a = v.d.data_c)) or (v.d.opcode = OP_BNE and (v.d.data_a /= v.d.data_c)) then
 			pc_src := '1';
 		else
 			pc_src := '0';

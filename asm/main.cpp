@@ -62,6 +62,7 @@ std::string get_op(std::string &s){
 int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std::vector<std::string> &inst){
 	remove_comment(cmd);
 	remove_spaces(cmd);
+	if(cmd.empty()) return 0;
 	if(cmd[cmd.size()-1] == ':'){
 		assert(lab.count(cmd) == 0);
 		lab[cmd.substr(0, cmd.size()-1)] = addr;
@@ -80,8 +81,8 @@ void neg(std::string &s){
 	int n = s.size();
 	bool fs = true;
 	for(int i = n-1; i >= 0; i--){
-		if(fs && s[i]=='1'){
-			fs = false;
+		if(fs){
+			if(s[i]=='1') fs = false;
 			continue;
 		}
 		s[i] = '0'+'1'-s[i];
@@ -177,7 +178,7 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 		} else if(i >= as.r_num && as.form == "R"){
 			d2b(r[i], 5);
 		} else if(as.form == "B"){
-			if(i==2) r[i] = i2b(label[r[i]], 16);
+			if(i==2) r[i] = i2b(label[r[i]]-addr-1, 16);
 			else reg2i(r[i]);
 		} else if(as.form == "J"){
 			r[i] = i2b(label[r[i]], 26);
@@ -249,8 +250,8 @@ int run(int argc, char *argv[]){
 		init_inst(command, addr, label, inst);
 	}
 	for(int i = 0; i < inst.size(); i++){
-		if(dump_enable) std::cerr << assemble(inst[i], i*4, label) + " # " + inst[i] << std::endl;
-		fout << assemble(inst[i], i*4, label) + "\n";
+		if(dump_enable) std::cerr << assemble(inst[i], i, label) + " # " + inst[i] << std::endl;
+		fout << assemble(inst[i], i, label) + "\n";
 	}
 	return 0;
 }

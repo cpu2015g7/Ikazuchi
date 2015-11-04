@@ -38,9 +38,9 @@ begin
 	process(we2, data2, addr2, mem) is
 	begin
 		if we2 = '1' then
-			mem(conv_integer(addr2(14 downto 2))) <= data2;
+			mem(conv_integer(addr2(12 downto 0))) <= data2;
 		else
-			sram_out.data <= mem(conv_integer(addr2(14 downto 2)));
+			sram_out.data <= mem(conv_integer(addr2(12 downto 0)));
 		end if;
 	end process;
 end architecture;

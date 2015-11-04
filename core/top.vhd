@@ -46,7 +46,7 @@ architecture struct of top is
   signal sram_in : sram_in_t := sram_in_z;
   signal sram_out : sram_out_t := sram_out_z;
 -- test
-  signal rom : rom_t := shift_test;
+  signal rom : rom_t := fib_compiler;
   signal rx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal tx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal rx_ready, rx_done, tx_go, tx_busy : std_logic := '0';
@@ -61,8 +61,8 @@ begin
 	cpu_1 : entity work.cpu port map (clk, rst, cpu_in, cpu_out);
 	alu_1 : entity work.alu port map (clk, rst, alu_in, alu_out);
 	fpu_1 : entity work.fpu port map (clk, rst, fpu_in, fpu_out);
---	sram_1 : entity work.sram_sim port map (clk, sram_in, sram_out, zd, za, xwa);
-	sram_1 : entity work.sram port map (clk, sram_in, sram_out, zd, za, xwa);
+	sram_1 : entity work.sram_sim port map (clk, sram_in, sram_out, zd, za, xwa);
+--	sram_1 : entity work.sram port map (clk, sram_in, sram_out, zd, za, xwa);
 	rx_1 : entity work.rx generic map (wtime) port map(clk, rx_data, rx_ready, rx_done, RS_RX);
 	tx_1 : entity work.tx generic map (wtime) port map(clk, tx_data, tx_go, tx_busy, RS_TX);
 
