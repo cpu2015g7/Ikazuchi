@@ -19,6 +19,9 @@ std::map<std::string, std::string> reg;
 std::map<std::string, asm_t> asmb;
 std::set<std::string> nops;
 bool dump_enable = true;
+bool add_nop = true;
+int alu_nop = 0;
+int other_nop = 4;
 
 void remove_comment(std::string &cmd){
 	for(int i = 0; i < cmd.size(); i++) if(cmd[i] == '#') {cmd = cmd.substr(0, i); break;};
@@ -48,8 +51,8 @@ void push_nop(std::vector<std::string> &s, int &addr, int n){
 int num_nop(std::string &s){
 	if(s == "nop") return 0;
 	if(s == "beq" || s == "bne") return 0;
-	if(nops.find(s)==nops.end()) return 1;
-	return 4;
+	if(nops.find(s)==nops.end()) return alu_nop;
+	return other_nop;
 }
 
 std::string get_op(std::string &s){
@@ -73,7 +76,7 @@ int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std:
 	inst.push_back(cmd);
 	addr += 1;
 	std::string op = get_op(cmd);
-	push_nop(inst, addr, num_nop(op));
+	if(add_nop) push_nop(inst, addr, num_nop(op));
 	return 0;
 }
 
