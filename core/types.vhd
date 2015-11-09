@@ -132,6 +132,6 @@ package types is
 	constant FPU_FADD : std_logic_vector(5 downto 0) := "100000";
 	constant FPU_FMUL : std_logic_vector(5 downto 0) := "000001";
 	constant FPU_FINV : std_logic_vector(5 downto 0) := "000011";
-	constant FPU_F2i  : std_logic_vector(5 downto 0) := "001000";
+	constant FPU_F2I  : std_logic_vector(5 downto 0) := "001000";
 	constant FPU_FSQRT: std_logic_vector(5 downto 0) := "011000";
 end package;
