@@ -35,15 +35,16 @@ int main(int argc, char *argv[]){
 	string s;
 	while(cin >> s){
 		assert(s.size()==32);
-		string t;
+		string t = "\t";
 		if(hex){
-			t = "x\"";
+			t += "x\"";
 		   	for(int i = 0; i < 8; i++) t += b2h[s.substr(4*i, 4)];
 			t += "\",";
 		}
-		else t = "\"" + s + "\",";
+		else t += "\"" + s + "\",";
 		cout << t << endl;
 	}
+	cout << "\tothers => (others => '0')" << endl;
 	
 	return 0;
 }
