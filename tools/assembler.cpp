@@ -196,6 +196,7 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 	}
 	if(as.form == "R"){
 		if(as.r_num == 3 || op == "jr") return as.opcd + r[1] + r[2] + r[0] + as.s1 + as.s2;
+		else if(as.v_num == 2) return as.opcd + r[1] + "00000" + r[2] + r[0] + as.s1 + as.s2;
 		else return as.opcd + "00000" + r[1] + r[0] + r[2] + as.s2;
 	} else if(op == "rsb"){
 		return as.opcd + r[0] + "00000" + "0000000000000000";
@@ -217,6 +218,7 @@ void init_setting(){
 	asmb["fslt"] = asm_t(3, 3, "R", "000000", "00000", "101011");
 	asmb["beq"] = asm_t(2, 3, "B", "000100", "", "");
 	asmb["bne"] = asm_t(2, 3, "B", "000101", "", "");
+	asmb["fneg"] = asm_t(2, 2, "R", "000000", "00000", "101100");
 	asmb["sll"] = asm_t(2, 3, "R", "000000", "", "000000");
 	asmb["srl"] = asm_t(2, 3, "R", "000000", "", "000010");
 	asmb["j"] = asm_t(0, 1, "J", "000010", "", "");
@@ -226,9 +228,9 @@ void init_setting(){
 	asmb["rrb"] = asm_t(1, 1, "I", "111110", "", "");
 	asmb["fadd"] = asm_t(3, 3, "R", "001011", "00000", "100000");
 	asmb["fmul"] = asm_t(3, 3, "R", "001011", "00000", "000001");
-	asmb["finv"] = asm_t(3, 3, "R", "001011", "00000", "000011");
-	asmb["f2i"] = asm_t(3, 3, "R", "001011", "00000", "001000");
-	asmb["fsqrt"] = asm_t(3, 3, "R", "001011", "00000", "011000");
+	asmb["finv"] = asm_t(2, 2, "R", "001011", "00000", "000011");
+	asmb["f2i"] = asm_t(2, 2, "R", "001011", "00000", "001000");
+	asmb["fsqrt"] = asm_t(2, 2, "R", "001011", "00000", "011000");
 
 	asmb["subi"] = asm_t(2, 3, "I", "001100", "", "");
 	asmb["move"] = asm_t(2, 2, "I", "001101", "", "");

@@ -110,6 +110,8 @@ begin
 				else
 					c := x"00000000";
 				end if;
+			when ALU_FNEG =>
+				c := a xor x"80000000";
 			when others => c := x"00000000";
 		end case;
 
