@@ -34,13 +34,12 @@ void remove_comma(std::string &cmd){
 void remove_spaces(std::string &cmd){
 	while(!cmd.empty()){
 		if(cmd[0] == ' ' || cmd[0] == '\t') cmd.erase(0, 1);
-		else return;
+		else break;
 	}
-	int n = cmd.size(), m = n-1;
-	while(m >= 0){
-		if(cmd[m] == ' ' || cmd[m] == '\t') m--;
+	int m = cmd.size()-1;
+	while(m >= 0 && (cmd[m] == ' ' || cmd[m] == '\t')){
+		cmd.erase(m--, 1);
 	}
-	cmd.erase(m+1);
 }
 
 void push_nop(std::vector<std::string> &s, int &addr, int n){
