@@ -172,7 +172,7 @@ begin
 		end if;
 
 		v.d.reg_a := r.f.inst(25 downto 21);
-		if v.d.reg_a = r.d.reg_c then
+		if v.d.reg_a = r.d.reg_c and r.d.reg_we = '1' then
 			v.d.data_a := cpu_in.alu_data;
 		else
 			v.d.data_a := v.regfile(conv_integer(v.d.reg_a));
@@ -186,7 +186,7 @@ begin
 		case v.d.opcode is
 			when OP_ALU | OP_FPU =>
 			   	v.d.reg_b := r.f.inst(20 downto 16);
-				if v.d.reg_b = r.d.reg_c then
+				if v.d.reg_b = r.d.reg_c and r.d.reg_we = '1' then
 					v.d.data_b := cpu_in.alu_data;
 				else
 					v.d.data_b := v.regfile(conv_integer(v.d.reg_b));
