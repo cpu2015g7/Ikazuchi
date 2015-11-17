@@ -1,3 +1,6 @@
 [submodule "FPU"]
 	path = FPU
 	url = git@github.com:cpu2015g7/FPU.git
+[submodule "simulator"]
+	path = simulator
+	url = git@github.com:cpu2015g7/simulator.git
