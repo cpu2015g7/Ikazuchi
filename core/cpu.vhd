@@ -280,7 +280,6 @@ begin
 		rin <= v;
 
 		cpu_out.inst_addr <= r.f.npc;
-		cpu_out.mem_we <= '0';
 		cpu_out.funct  <= r.d.funct;
 		cpu_out.data_a <= r.d.data_a;
 		cpu_out.data_b <= r.d.data_b;
