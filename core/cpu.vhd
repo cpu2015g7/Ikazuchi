@@ -205,7 +205,11 @@ begin
 					v.d.data_b := ext(r.f.inst(15), 16)&r.f.inst(15 downto 0);
 				end if;
 				v.d.reg_c := r.f.inst(20 downto 16);
-				v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
+				if v.d.reg_c = r.d.reg_c and r.d.reg_we = '1' then
+					v.d.data_c := cpu_in.alu_data;
+				else
+					v.d.data_c := v.regfile(conv_integer(v.d.reg_c));
+				end if;
 		end case;
 		case v.d.opcode is
 			when OP_FPU | OP_SW | OP_LW | OP_BEQ | OP_BNE | OP_RSB | OP_RRB => v.d.reg_we := '0';
