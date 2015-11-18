@@ -4,3 +4,6 @@
 [submodule "simulator"]
 	path = simulator
 	url = git@github.com:cpu2015g7/simulator.git
+[submodule "compiler"]
+	path = compiler
+	url = git@github.com:cpu2015g7/compiler.git
