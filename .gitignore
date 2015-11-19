@@ -4,7 +4,6 @@
 *.old
 *.exe
 *.out
-*.txt
 *~
 *.swp
 tmp/
