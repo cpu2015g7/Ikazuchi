@@ -6,32 +6,33 @@
 #include <vector>
 #include <string>
 #include <assert.h>
+using namespace std;
 
 struct asm_t {
 	int r_num, v_num;
-	std::string form, opcd, s1, s2;
+	string form, opcd, s1, s2;
 	asm_t(int r_num, int v_num, const char *form, const char *opcd, const char *s1, const char *s2)
 		: r_num(r_num), v_num(v_num), form(form), opcd(opcd), s1(s1), s2(s2) {}
 	asm_t() { asm_t(0, 0, "", "", "", ""); }
 };
 
-std::map<std::string, std::string> reg;
-std::map<std::string, asm_t> asmb;
-std::set<std::string> nops;
+map<string, string> reg;
+map<string, asm_t> asmb;
+set<string> nops;
 bool dump_enable = true;
 bool add_nop = true;
 int alu_nop = 0;
 int other_nop = 4;
 
-void remove_comment(std::string &cmd){
+void remove_comment(string &cmd){
 	for(int i = 0; i < cmd.size(); i++) if(cmd[i] == '#') {cmd = cmd.substr(0, i); break;};
 }
 
-void remove_comma(std::string &cmd){
+void remove_comma(string &cmd){
 	for(int i = 0; i < cmd.size(); i++) if(cmd[i] == ',') cmd[i] = ' ';
 }
 
-void remove_spaces(std::string &cmd){
+void remove_spaces(string &cmd){
 	while(!cmd.empty()){
 		if(cmd[0] == ' ' || cmd[0] == '\t') cmd.erase(0, 1);
 		else break;
@@ -42,26 +43,26 @@ void remove_spaces(std::string &cmd){
 	}
 }
 
-void push_nop(std::vector<std::string> &s, int &addr, int n){
+void push_nop(vector<string> &s, int &addr, int n){
 	addr += n;
 	while(n--) s.push_back("nop");
 }
 
-int num_nop(std::string &s){
+int num_nop(string &s){
 	if(s == "nop") return 0;
 	if(s == "beq" || s == "bne") return 0;
 	if(nops.find(s)==nops.end()) return alu_nop;
 	return other_nop;
 }
 
-std::string get_op(std::string &s){
-	std::string res;
-	std::stringstream ss(s);
+string get_op(string &s){
+	string res;
+	stringstream ss(s);
 	ss>>res;
 	return res;
 }
 
-int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std::vector<std::string> &inst){
+int init_inst(string &cmd, int &addr, map<string, int> &lab, vector<string> &inst){
 	remove_comment(cmd);
 	remove_spaces(cmd);
 	if(cmd.empty()) return 0;
@@ -74,12 +75,12 @@ int init_inst(std::string &cmd, int &addr, std::map<std::string, int> &lab, std:
 	remove_comma(cmd);
 	inst.push_back(cmd);
 	addr += 1;
-	std::string op = get_op(cmd);
+	string op = get_op(cmd);
 	if(add_nop) push_nop(inst, addr, num_nop(op));
 	return 0;
 }
 
-void neg(std::string &s){
+void neg(string &s){
 	int n = s.size();
 	bool fs = true;
 	for(int i = n-1; i >= 0; i--){
@@ -91,27 +92,27 @@ void neg(std::string &s){
 	}
 }
 
-std::string i2b(int a, int n){
-	std::string s(n, '0');
+string i2b(int a, int n){
+	string s(n, '0');
 	for(int i = 0; i < n; i++){
 		if(1&(a>>(n-i-1))) s[i] = '1';
 	}
 	return s;
 }
 
-void d2b(std::string &s, int n){
-	std::stringstream ss(s);
-	ss.unsetf(std::ios::dec);
+void d2b(string &s, int n){
+	stringstream ss(s);
+	ss.unsetf(ios::dec);
 	int a;
 	ss >> a;
 	s = i2b(a, n);
 }
 
-void d2b(std::string &s){
+void d2b(string &s){
 	d2b(s, 16);
 }
 
-void reg2i(std::string &s){
+void reg2i(string &s){
 	if(s == "$zero") s = "00000";
 	else if(s == "$at") s = "00001";
 	else if(s == "$v0") s = "00010";
@@ -147,12 +148,12 @@ void reg2i(std::string &s){
 	else if(s.substr(0, 2) == "$r"){ s = s.substr(2); d2b(s, 5); }
 }
 
-void dis2ri(std::string &s, std::string &t){
+void dis2ri(string &s, string &t){
 	int sz = s.size();
 	int ps = 0;
 	while(ps<sz && s[ps]!='(') ps++;
 	t = s.substr(0, ps);
-	std::stringstream ss(t), ss2;
+	stringstream ss(t), ss2;
 	int a;
 	ss >> a;
 	a = (a+(1<<16))&((1<<16)-1);
@@ -163,9 +164,9 @@ void dis2ri(std::string &s, std::string &t){
 	reg2i(s);
 }
 
-std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &label){
-	std::stringstream ss(cmd);
-	std::string op, r[3];
+string assemble(string &cmd, int addr, map<string, int> &label){
+	stringstream ss(cmd);
+	string op, r[3];
 	ss >> op;
 	if(op == "nop"){
 		return "00000000000000000000000000000000";
@@ -184,7 +185,7 @@ std::string assemble(std::string &cmd, int addr, std::map<std::string, int> &lab
 			else reg2i(r[i]);
 		} else if(as.form == "J"){
 			r[i] = i2b(label[r[i]], 26);
-		} else (i < as.r_num ? reg2i : static_cast<void (*)(std::string &)>(d2b))(r[i]);
+		} else (i < as.r_num ? reg2i : static_cast<void (*)(string &)>(d2b))(r[i]);
 	}
 	if(op == "subi"){
 		neg(r[2]);
@@ -236,7 +237,7 @@ void init_setting(){
 	asmb["subi"] = asm_t(2, 3, "I", "001100", "", "");
 	asmb["move"] = asm_t(2, 2, "I", "001101", "", "");
 
-	nops = std::set<std::string>({"lw", "sw", "rsb", "rrb", "fadd", "fmul", "finv", "fsqrt"});
+	nops = set<string>({"lw", "sw", "rsb", "rrb", "fadd", "fmul", "finv", "fsqrt"});
 }
 
 int run(int argc, char *argv[]){
@@ -245,18 +246,18 @@ int run(int argc, char *argv[]){
 	init_setting();
 	const char *in_name = argv[1];
 	const char *out_name = argc >=3 ? argv[2] : "a.txt";
-	std::ifstream fin(in_name);
-	std::ofstream fout(out_name);
+	ifstream fin(in_name);
+	ofstream fout(out_name);
 
-	std::string command;
+	string command;
 	int addr = 0;
-	std::map<std::string, int> label;
-	std::vector<std::string> inst;
+	map<string, int> label;
+	vector<string> inst;
 	while(getline(fin, command)){
 		init_inst(command, addr, label, inst);
 	}
 	for(int i = 0; i < inst.size(); i++){
-		if(dump_enable) std::cerr << assemble(inst[i], i, label) + " # " + inst[i] << std::endl;
+		if(dump_enable) cerr << assemble(inst[i], i, label) + " # " + inst[i] << endl;
 		fout << assemble(inst[i], i, label) + "\n";
 	}
 	return 0;
