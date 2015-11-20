@@ -63,17 +63,60 @@ string get_op(string &s){
 	return res;
 }
 
-int init_inst(string &cmd, int &addr, map<string, int> &lab, vector<string> &inst){
+int init_inst(string &cmd, int &addr, map<string, int> &lab, map<string, int> &dlab, vector<string> &inst, string &dstr, bool &tmode){
 	remove_comment(cmd);
 	remove_spaces(cmd);
 	if(cmd.empty()) return 0;
 	if(cmd[cmd.size()-1] == ':'){
 		assert(lab.count(cmd) == 0);
-		lab[cmd.substr(0, cmd.size()-1)] = addr;
+		if(tmode) lab[cmd.substr(0, cmd.size()-1)] = addr;
+		else dstr = cmd.substr(0, cmd.size()-1);
 		return 0;
 	}
+	if(cmd == ".text"){
+		tmode = true;
+		return 0;
+	}
+	if(cmd == ".data"){
+		tmode = false;
+		return 0;
+	}
+	if(cmd.substr(0, 5) == ".long"){
+		stringstream ss(cmd.substr(5));
+		ss.unsetf(ios::dec);
+		int data;
+		ss >> data;
+		dlab[dstr] = data;
+		return 0;
+	}
+	if(cmd[0] == '.'){
+		return 0;
+	}
+	assert(tmode);
 
 	remove_comma(cmd);
+	if(cmd.substr(0, 3) == "llw"){
+		stringstream ss(cmd.substr(3));
+		string reg, data_l;
+		ss >> reg >> data_l;
+		unsigned int data = dlab[data_l.substr(1, data_l.size()-2)];
+		if(data < (1u<<16)){
+			inst.push_back("ori " + reg + " $zero " + to_string(data));
+			addr += 1;
+		} else if(-(1<<15) <= (int)data && (int)data < 0){
+			inst.push_back("addi " + reg + " $zero " + to_string((int)data));
+			addr += 1;
+		} else {
+			inst.push_back("ori " + reg + " $zero " + to_string(data>>16));
+			inst.push_back("sll " + reg + " " + reg + " 16");
+			addr += 2;
+			if(data&0xffff){
+				inst.push_back("ori " + reg + " " + reg + " " + to_string(data&0xffff));
+				addr += 1;
+			}
+		}
+		return 0;
+	}
 	inst.push_back(cmd);
 	addr += 1;
 	string op = get_op(cmd);
@@ -258,10 +301,12 @@ int run(int argc, char *argv[]){
 
 	string command;
 	int addr = 0;
-	map<string, int> label;
+	map<string, int> label, dlabel;
+	string dstr;
+	bool tmode = true;
 	vector<string> inst;
 	while(getline(fin, command)){
-		init_inst(command, addr, label, inst);
+		init_inst(command, addr, label, dlabel, inst, dstr, tmode);
 	}
 	for(int i = 0; i < inst.size(); i++){
 		if(dump_enable) cerr << assemble(inst[i], i, label) + " # " + inst[i] << endl;
