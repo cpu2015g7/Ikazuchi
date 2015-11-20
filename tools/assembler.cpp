@@ -218,6 +218,9 @@ void init_setting(){
 	asmb["beq"] = asm_t(2, 3, "B", "000100", "", "");
 	asmb["bne"] = asm_t(2, 3, "B", "000101", "", "");
 	asmb["fneg"] = asm_t(2, 2, "R", "000000", "00000", "101100");
+	asmb["f2i"] = asm_t(2, 2, "R", "000000", "00000", "101100");
+	asmb["i2f"] = asm_t(2, 2, "R", "000000", "00000", "101101");
+	asmb["flr"] = asm_t(2, 2, "R", "000000", "00000", "101111");
 	asmb["sll"] = asm_t(2, 3, "R", "000000", "", "000000");
 	asmb["srl"] = asm_t(2, 3, "R", "000000", "", "000010");
 	asmb["j"] = asm_t(0, 1, "J", "000010", "", "");
@@ -228,13 +231,12 @@ void init_setting(){
 	asmb["fadd"] = asm_t(3, 3, "R", "001011", "00000", "100000");
 	asmb["fmul"] = asm_t(3, 3, "R", "001011", "00000", "000001");
 	asmb["finv"] = asm_t(2, 2, "R", "001011", "00000", "000011");
-	asmb["f2i"] = asm_t(2, 2, "R", "001011", "00000", "001000");
 	asmb["fsqrt"] = asm_t(2, 2, "R", "001011", "00000", "011000");
 
 	asmb["subi"] = asm_t(2, 3, "I", "001100", "", "");
 	asmb["move"] = asm_t(2, 2, "I", "001101", "", "");
 
-	nops = std::set<std::string>({"lw", "sw", "rsb", "rrb", "fadd", "fmul", "finv", "f2i", "fsqrt"});
+	nops = std::set<std::string>({"lw", "sw", "rsb", "rrb", "fadd", "fmul", "finv", "fsqrt"});
 }
 
 int run(int argc, char *argv[]){
