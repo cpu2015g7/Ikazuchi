@@ -193,7 +193,7 @@ begin
 				end if;
 				v.d.reg_c := r.f.inst(15 downto 11);
 				v.d.data_c := (others => '0');
-			when OP_JAL =>
+			when OP_J | OP_JAL =>
 				v.d.data_a := (others => '0');
 				v.d.data_b := v.d.pc + 4;
 				v.d.reg_c := "11111";
@@ -238,7 +238,7 @@ begin
 		end if;
 
 		v.f.pc := r.f.npc;
-		if cpu_in.inst_data(31 downto 26) = OP_JAL then
+		if cpu_in.inst_data(31 downto 26) = OP_J or cpu_in.inst_data(31 downto 26) = OP_JAL then
 			v.f.npc := (r.f.npc(31 downto 28)&cpu_in.inst_data(25 downto 0)&"00");
 		elsif cpu_in.inst_data(31 downto 26) = OP_ALU and cpu_in.inst_data(5 downto 0) = FN_JR then
 			-- bug (reg_we will be expected to '0')
