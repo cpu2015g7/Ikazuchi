@@ -129,10 +129,12 @@ package types is
 	constant ALU_SLT  : std_logic_vector(5 downto 0) := "101010";
 	constant ALU_FSLT : std_logic_vector(5 downto 0) := "101011";
 	constant ALU_FNEG : std_logic_vector(5 downto 0) := "101100";
+	constant ALU_F2I  : std_logic_vector(5 downto 0) := "101101";
+	constant ALU_I2F  : std_logic_vector(5 downto 0) := "101110";
+	constant ALU_FLR  : std_logic_vector(5 downto 0) := "101111";
 	
 	constant FPU_FADD : std_logic_vector(5 downto 0) := "100000";
 	constant FPU_FMUL : std_logic_vector(5 downto 0) := "000001";
 	constant FPU_FINV : std_logic_vector(5 downto 0) := "000011";
-	constant FPU_F2I  : std_logic_vector(5 downto 0) := "001000";
 	constant FPU_FSQRT: std_logic_vector(5 downto 0) := "011000";
 end package;
