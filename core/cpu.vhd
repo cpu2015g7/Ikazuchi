@@ -212,8 +212,8 @@ begin
 				end if;
 		end case;
 		case v.d.opcode is
-			when OP_FPU | OP_SW | OP_LW | OP_BEQ | OP_BNE | OP_RSB | OP_RRB => v.d.reg_we := '0';
-			when others => v.d.reg_we := '1';
+			when OP_ALU | OP_JAL | OP_ADDI | OP_ORI => v.d.reg_we := '1';
+			when others => v.d.reg_we := '0';
 		end case;
 		case v.d.opcode is
 			when OP_FPU => v.d.fpu_we := '1';
