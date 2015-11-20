@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <assert.h>
 using namespace std;
 
@@ -19,7 +20,7 @@ struct asm_t {
 map<string, string> reg;
 map<string, asm_t> asmb;
 set<string> nops;
-bool dump_enable = true;
+bool dump_enable = false;
 bool add_nop = true;
 int alu_nop = 0;
 int other_nop = 4;
@@ -241,11 +242,17 @@ void init_setting(){
 }
 
 int run(int argc, char *argv[]){
-	if(argc < 2) return -1;
+	string in_name("a.s"), out_name("a.t");
+	for(int i = 1; i < argc; i++){
+		if(!strcmp(argv[i], "-i")) in_name = argv[++i];
+		if(!strcmp(argv[i], "-o")) out_name = argv[++i];
+		if(!strcmp(argv[i], "--dump")) dump_enable = true;
+		if(!strcmp(argv[i], "--nodump")) dump_enable = false;
+		if(!strcmp(argv[i], "--nop")) add_nop = true;
+		if(!strcmp(argv[i], "--nonop")) add_nop = false;
+	}
 
 	init_setting();
-	const char *in_name = argv[1];
-	const char *out_name = argc >=3 ? argv[2] : "a.txt";
 	ifstream fin(in_name);
 	ofstream fout(out_name);
 
