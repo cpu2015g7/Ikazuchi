@@ -109,6 +109,7 @@ package types is
 
 	-- constants
 	constant OP_ALU   : std_logic_vector(5 downto 0) := "000000";
+	constant OP_J     : std_logic_vector(5 downto 0) := "000010";
 	constant OP_JAL   : std_logic_vector(5 downto 0) := "000011";
 	constant OP_BEQ   : std_logic_vector(5 downto 0) := "000100";
 	constant OP_BNE   : std_logic_vector(5 downto 0) := "000101";
