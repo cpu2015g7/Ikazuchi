@@ -7,3 +7,6 @@
 *~
 *.swp
 tmp/
+test/*.s
+test/*.t
+test/*.txt
