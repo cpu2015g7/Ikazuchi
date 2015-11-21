@@ -63,6 +63,24 @@ string get_op(string &s){
 	return res;
 }
 
+void decode_li(vector<string> &inst, int &addr, string &reg, unsigned int data){
+	if(data < (1u<<16)){
+		inst.push_back("ori " + reg + " $zero " + to_string(data));
+		addr += 1;
+	} else if(-(1<<15) <= (int)data && (int)data < 0){
+		inst.push_back("addi " + reg + " $zero " + to_string((int)data));
+		addr += 1;
+	} else {
+		inst.push_back("ori " + reg + " $zero " + to_string(data>>16));
+		inst.push_back("sll " + reg + " " + reg + " 16");
+		addr += 2;
+		if(data&0xffff){
+			inst.push_back("ori " + reg + " " + reg + " " + to_string(data&0xffff));
+			addr += 1;
+		}
+	}
+}
+
 int init_inst(string &cmd, int &addr, map<string, int> &lab, map<string, int> &dlab, vector<string> &inst, string &dstr, bool &tmode){
 	remove_comment(cmd);
 	remove_spaces(cmd);
@@ -100,21 +118,16 @@ int init_inst(string &cmd, int &addr, map<string, int> &lab, map<string, int> &d
 		string reg, data_l;
 		ss >> reg >> data_l;
 		unsigned int data = dlab[data_l.substr(1, data_l.size()-2)];
-		if(data < (1u<<16)){
-			inst.push_back("ori " + reg + " $zero " + to_string(data));
-			addr += 1;
-		} else if(-(1<<15) <= (int)data && (int)data < 0){
-			inst.push_back("addi " + reg + " $zero " + to_string((int)data));
-			addr += 1;
-		} else {
-			inst.push_back("ori " + reg + " $zero " + to_string(data>>16));
-			inst.push_back("sll " + reg + " " + reg + " 16");
-			addr += 2;
-			if(data&0xffff){
-				inst.push_back("ori " + reg + " " + reg + " " + to_string(data&0xffff));
-				addr += 1;
-			}
-		}
+		decode_li(inst, addr, reg, data);
+		return 0;
+	}
+	if(cmd.substr(0, 2) == "li"){
+		stringstream ss(cmd.substr(2));
+		string reg;
+		unsigned int data;
+		ss.unsetf(ios::dec);
+		ss >> reg >> data;
+		decode_li(inst, addr, reg, data);
 		return 0;
 	}
 	inst.push_back(cmd);
