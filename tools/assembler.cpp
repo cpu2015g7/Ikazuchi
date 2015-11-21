@@ -104,7 +104,7 @@ int init_inst(string &cmd, int &addr, map<string, int> &lab, map<string, int> &d
 	if(cmd.substr(0, 5) == ".long"){
 		stringstream ss(cmd.substr(5));
 		ss.unsetf(ios::dec);
-		int data;
+		unsigned int data;
 		ss >> data;
 		dlab[dstr] = data;
 		return 0;
