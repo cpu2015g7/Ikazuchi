@@ -9,7 +9,5 @@ fi
 
 for f in $(find ${DIR}/$1 -name "*.ml")
 do
-	echo "run ${f}"
 	${DIR}/scripts/run.sh ${f%.ml}
-	sleep 1
 done
