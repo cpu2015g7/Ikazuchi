@@ -3,7 +3,7 @@
 .text
 # IO
 
-# not tested!!
+# tested (recv_send.s)
 send32:
 	srl	$s0, $a0, 24
 	rsb	$s0
@@ -14,7 +14,7 @@ send32:
 	rsb	$a0
 	jr	$ra
 
-# not tested!!
+# tested (recv_send.s)
 recv32:
 	rrb	$v0
 	sll	$v0, $v0, 8
