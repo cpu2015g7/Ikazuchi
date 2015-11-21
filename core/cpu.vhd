@@ -58,10 +58,18 @@ architecture struct of cpu is
 		data_c : std_logic_vector(31 downto 0);
 		reg_c  : std_logic_vector(4 downto 0);
 		reg_c1  : std_logic_vector(4 downto 0);
+		reg_c2  : std_logic_vector(4 downto 0);
+		reg_c3  : std_logic_vector(4 downto 0);
+		reg_c4  : std_logic_vector(4 downto 0);
+		reg_c5  : std_logic_vector(4 downto 0);
 		mem_re : std_logic;
 		mem_re1 : std_logic;
 		fpu_we : std_logic;
 		fpu_we1 : std_logic;
+		fpu_we2 : std_logic;
+		fpu_we3 : std_logic;
+		fpu_we4 : std_logic;
+		fpu_we5 : std_logic;
 	end record;
 
 	type reg_t is record
@@ -113,10 +121,18 @@ architecture struct of cpu is
 		data_c => (others => '0'),
 		reg_c => (others => '0'),
 		reg_c1 => (others => '0'),
+		reg_c2 => (others => '0'),
+		reg_c3 => (others => '0'),
+		reg_c4 => (others => '0'),
+		reg_c5 => (others => '0'),
 		mem_re => '0',
 		mem_re1 => '0',
 		fpu_we => '0',
-		fpu_we1 => '0'
+		fpu_we1 => '0',
+		fpu_we2 => '0',
+		fpu_we3 => '0',
+		fpu_we4 => '0',
+		fpu_we5 => '0'
 	);
 
 	constant reg_z : reg_t := (
@@ -264,6 +280,10 @@ begin
 		-- memory
 		v.m.reg_c := r.e.reg_c;
 		v.m.reg_c1 := r.m.reg_c;
+		v.m.reg_c2 := r.m.reg_c1;
+		v.m.reg_c3 := r.m.reg_c2;
+		v.m.reg_c4 := r.m.reg_c3;
+		v.m.reg_c5 := r.m.reg_c4;
 		v.m.mem_re := r.e.mem_re;
 		v.m.mem_re1 := r.m.mem_re;
 		if r.m.mem_re1 = '1' then
@@ -271,8 +291,12 @@ begin
 		end if;
 		v.m.fpu_we := r.e.fpu_we;
 		v.m.fpu_we1 := r.m.fpu_we;
+		v.m.fpu_we2 := r.m.fpu_we1;
+		v.m.fpu_we3 := r.m.fpu_we2;
+		v.m.fpu_we4 := r.m.fpu_we3;
+		v.m.fpu_we5 := r.m.fpu_we4;
 		if r.m.fpu_we1 = '1' then
-			v.regfile(conv_integer(r.m.reg_c1)) := cpu_in.fpu_data;
+			v.regfile(conv_integer(r.m.reg_c5)) := cpu_in.fpu_data;
 		end if;
 		if r.e.rx_go = '1' then
 			v.regfile(conv_integer(r.e.reg_c))(7 downto 0) := cpu_in.rx_data;
