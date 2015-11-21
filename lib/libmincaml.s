@@ -50,17 +50,17 @@ min_caml_fequal:
 	sub	$v0, $v0, $s0
 	jr	$ra
 
-#
+# ok (float.s)
 min_caml_fless:
 	fslt	$v0, $a0, $a1
 	jr	$ra
 
-#
+# ok (float.s)
 min_caml_fispos:
 	fslt	$v0, $zero, $a0
 	jr	$ra
 
-#
+# ok (float.s)
 min_caml_fisneg:
 	fslt	$v0, $a0, $zero
 	jr	$ra
