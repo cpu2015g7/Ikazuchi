@@ -19,10 +19,11 @@ struct asm_t {
 
 map<string, string> reg;
 map<string, asm_t> asmb;
-set<string> nops;
+set<string> nop_f, nop_o;
 bool dump_enable = false;
 bool add_nop = true;
 int alu_nop = 0;
+int fpu_nop = 8;
 int other_nop = 4;
 
 void remove_comment(string &cmd){
@@ -52,8 +53,9 @@ void push_nop(vector<string> &s, int &addr, int n){
 int num_nop(string &s){
 	if(s == "nop") return 0;
 	if(s == "beq" || s == "bne") return 0;
-	if(nops.find(s)==nops.end()) return alu_nop;
-	return other_nop;
+	if(nop_f.find(s)!=nop_f.end()) return fpu_nop;
+	if(nop_o.find(s)!=nop_o.end()) return other_nop;
+	return alu_nop;
 }
 
 string get_op(string &s){
@@ -294,7 +296,8 @@ void init_setting(){
 	asmb["subi"] = asm_t(2, 3, "I", "001100", "", "");
 	asmb["move"] = asm_t(2, 2, "I", "001101", "", "");
 
-	nops = set<string>({"lw", "sw", "rsb", "rrb", "fadd", "fmul", "finv", "fsqrt"});
+	nop_f = set<string>({"fadd", "fmul", "finv", "fsqrt"});
+	nop_o = set<string>({"lw", "sw", "rsb", "rrb"});
 }
 
 int run(int argc, char *argv[]){
