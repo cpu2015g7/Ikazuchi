@@ -230,6 +230,9 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 	if(op == "nop"){
 		return "00000000000000000000000000000000";
 	}
+	if(op == "hlt"){
+		return "11110000000000000000000000000000";
+	}
 	if(op == "la"){
 		string reg, addr_l;
 		ss >> reg >> addr_l;
