@@ -11,7 +11,7 @@ loop:
 	i2f	$a0, $t0
 	fmul	$a0, $a0, $t3
 	jal	min_caml_send32
-	jal	min_caml_cos
+	jal	min_caml_sin
 	move	$a0, $v0
 	jal	min_caml_send32
 	addi	$t0, $t0, 1
