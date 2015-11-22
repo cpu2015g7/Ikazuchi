@@ -116,3 +116,20 @@ min_caml_float_of_int:
 min_caml_floor:
 #	flr	$v0, $a0
 	jr	$ra
+
+
+# array
+
+# not tested!!
+# int -> 'a -> 'a array
+min_caml_create_array:
+	move	$s0, $gp
+	move	$v0, $gp
+	add	$gp, $gp, $a0
+_create_array_loop:
+	beq	$s0, $gp, _create_array_end
+	addi	$s0, $s0, 1
+	sw	$a1, -1($s0)
+	j	_create_array_loop
+_create_array_end:
+	jr	$ra
