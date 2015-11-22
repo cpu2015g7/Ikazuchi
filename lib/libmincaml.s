@@ -6,7 +6,7 @@ _HALF:	# 0.5
 # IO
 
 # ok (recv_send.s)
-send32:
+min_caml_send32:
 	srl	$s0, $a0, 24
 	rsb	$s0
 	srl	$s0, $a0, 16
@@ -17,7 +17,7 @@ send32:
 	jr	$ra
 
 # ok (recv_send.s)
-recv32:
+min_caml_recv32:
 	rrb	$v0
 	sll	$v0, $v0, 8
 	rrb	$v0
@@ -68,10 +68,10 @@ min_caml_fisneg:
 # ok (float.s)
 min_caml_fiszero:
 	sll	$a0, $a0, 1
-	beq	$a0, $zero, fiszero_true
+	beq	$a0, $zero, _fiszero_true
 	move	$v0, $zero
 	jr	$ra
-fiszero_true:
+_fiszero_true:
 	addi	$v0, $zero, 1
 	jr	$ra
 
@@ -102,17 +102,17 @@ min_caml_sqrt:
 	fsqrt	$v0, $a0
 	jr	$ra
 
-# not implemented
-min_caml_floor:
-#	flr	$v0, $a0
-	jr	$ra
-
-# ok (float.s)  (Lepton_s' simulator)
+# ok (float.s)
 min_caml_int_of_float:
 	f2i	$v0, $a0
 	jr	$ra
 
-# ok (float.s) (Lepton_s' simulator)
+# ok (float.s)
 min_caml_float_of_int:
 	i2f	$v0, $a0
+	jr	$ra
+
+# not implemented
+min_caml_floor:
+#	flr	$v0, $a0
 	jr	$ra
