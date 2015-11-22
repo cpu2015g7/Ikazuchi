@@ -20,7 +20,7 @@ begin
 	f2i_1: entity work.f2i port map (alu_in.data_a, f2ic);
 	i2f_1: entity work.i2f port map (alu_in.data_a, i2fc);
 
-	comb : process(alu_in) is
+	comb : process(alu_in, f2ic, i2fc) is
 		variable a : std_logic_vector(31 downto 0);
 		variable b : std_logic_vector(31 downto 0);
 		variable c : std_logic_vector(31 downto 0);
