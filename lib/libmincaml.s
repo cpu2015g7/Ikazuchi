@@ -1,6 +1,19 @@
 .data
 _HALF:	# 0.5
 	.long	0x3f000000
+_ONE:   # 1.0
+	.long	0x3f800000
+_TWO:	# 2.0
+	.long	0x40000000
+
+_qPI:	# PI/4
+	.long	0x3f490fdb
+_hPI:	# PI/2
+	.long	0x3fc90fdb
+_PI:	# PI
+	.long	0x40490fdb
+_dPI:	# 2*PI
+	.long	0x40c90fdb
 
 .text
 # IO
@@ -150,3 +163,133 @@ _create_array_loop:
 	j	_create_array_loop
 _create_array_end:
 	jr	$ra
+
+# trig
+
+# ok (trig.s)
+# $a0 must be equal to return value
+# float -> float
+min_caml_reduction:
+	llw	$s0, (_PI)
+	llw	$s1, (_dPI)
+	llw	$s2, (_TWO)
+	llw	$s3, (_HALF)
+_reduction_loop_mul:
+	fmul	$s0, $s0, $s2
+	fslt	$at, $a0, $s0
+	beq	$at, $zero, _reduction_loop_mul
+_reduction_loop_sub:
+	fslt	$at, $a0, $s0
+	bne	$at, $zero, _reduction_endif
+	fneg	$at, $s0
+	fadd	$a0, $a0, $at
+_reduction_endif:
+	fmul	$s0, $s0, $s3
+	fslt	$at, $a0, $s1
+	beq	$at, $zero, _reduction_loop_sub
+	move	$v0, $a0
+	jr	$ra
+
+# ok (trig.s)
+# float -> int -> float
+min_caml_kernel_sin:
+	fmul	$at, $a0, $a0   #  $at = x^2
+	li	$s0, 0xb94d64b6 # -1/7!
+	fmul	$v0, $s0, $at
+	li	$s0, 0x3c088666 #  1/5!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0xbe2aaaac # -1/3!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	llw	$s0, (_ONE)     #  1/1!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $a0
+	add	$v0, $v0, $s7   #  SIGN
+	jr	$ra
+
+# ok (trig.s)
+# float -> int -> float
+min_caml_kernel_cos:
+	fmul	$at, $a0, $a0   #  $at = x^2
+	li	$s0, 0xbab38106 # -1/6!
+	fmul	$v0, $s0, $at
+	li	$s0, 0x3d2aa789 #  1/4!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0xbf000000 # -1/2!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	llw	$s0, (_ONE)     #  1/0!
+	fadd	$v0, $v0, $s0
+	add	$v0, $v0, $s7   #  SIGN
+	jr	$ra
+
+# ok (sin.s)
+# ok (trig.s) (1ulp error)
+# float -> float
+min_caml_sin:
+	srl	$s7, $a0, 31
+	sll	$a0, $a0, 1
+	srl	$a0, $a0, 1
+	sw	$ra, 0($sp)
+	jal	min_caml_reduction
+	lw	$ra, 0($sp)
+	llw	$s1, (_PI)
+	fslt	$at, $a0, $s1
+	bne	$at, $zero, _sin_lt_pi
+	fneg	$at, $s1
+	fadd	$a0, $a0, $at
+	li	$at, 1
+	sub	$s7, $at, $s7
+_sin_lt_pi:
+	sll	$s7, $s7, 31
+	llw	$s2, (_hPI)
+	fslt	$at, $a0, $s2
+	bne	$at, $zero, _sin_lt_hpi
+	fneg	$at, $a0
+	fadd	$a0, $at, $s1
+_sin_lt_hpi:
+	llw	$s3, (_qPI)
+	fslt	$at, $s3, $a0
+	beq	$at, $zero, _sin_le_qpi
+	fneg	$at, $a0
+	fadd	$a0, $at, $s2
+	j	min_caml_kernel_cos
+_sin_le_qpi:
+	j	min_caml_kernel_sin
+
+# ok (cos.s)
+# ok (trig.s) (2ulp error)
+# float -> float
+min_caml_cos:
+	li	$s7, 0
+	sll	$a0, $a0, 1
+	srl	$a0, $a0, 1
+	sw	$ra, 0($sp)
+	jal	min_caml_reduction
+	lw	$ra, 0($sp)
+	llw	$s1, (_PI)
+	fslt	$at, $a0, $s1
+	bne	$at, $zero, _cos_lt_pi
+	fneg	$at, $s1
+	fadd	$a0, $a0, $at
+	li	$s7, 1
+_cos_lt_pi:
+	llw	$s2, (_hPI)
+	fslt	$at, $a0, $s2
+	bne	$at, $zero, _cos_lt_hpi
+	fneg	$at, $a0
+	fadd	$a0, $at, $s1
+	li	$at, 1
+	sub	$s7, $at, $s7
+_cos_lt_hpi:
+	sll	$s7, $s7, 31
+	llw	$s3, (_qPI)
+	fslt	$at, $s3, $a0
+	beq	$at, $zero, _cos_le_qpi
+	fneg	$at, $a0
+	fadd	$a0, $at, $s2
+	j	min_caml_kernel_sin
+_cos_le_qpi:
+	j	min_caml_kernel_cos
