@@ -1,8 +1,13 @@
-## test ML programs
+## run MinCaml programs
 ``` bash
 $ ./allrun.sh <test_dir>
 ```
-## test a ML program
+## run a MinCaml program
 ``` bash
-$ ./run.sh <test_file>
+$ ./run.sh <test_name>
+```
+
+## test a asm program
+``` bash
+$ ./test-s.sh <test_name>
 ```

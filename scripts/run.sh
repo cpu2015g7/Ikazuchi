@@ -18,4 +18,4 @@ echo "start simulating"
 if [ ! -f ${DIR}/${1}-in.txt ]; then
 	touch ${DIR}/${1}-in.txt
 fi
-${DIR}/simulator/sim ${DIR}/${1}.t 100000000 > ${DIR}/${1}-out.txt
+${DIR}/simulator/sim ${DIR}/${1}.t 10000000000 > ${DIR}/${1}-out.txt
