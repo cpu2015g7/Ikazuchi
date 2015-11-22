@@ -1,5 +1,6 @@
 .text
 main:
+	sw	$ra, 0($sp)
 	li	$a0, 5
 	jal	min_caml_print_int
 	li	$a0, 0x0a # '/n'
@@ -28,4 +29,6 @@ main:
 	jal	min_caml_print_char
 	li	$a0, 0x0a # '\n'
 	jal	min_caml_print_char
+end:
+	lw	$ra, 0($sp)
 	jr	$ra
