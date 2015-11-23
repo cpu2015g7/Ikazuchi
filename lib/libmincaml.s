@@ -293,3 +293,63 @@ _cos_lt_hpi:
 	j	min_caml_kernel_sin
 _cos_le_qpi:
 	j	min_caml_kernel_cos
+
+# ok (atan.s)
+# float -> float
+min_caml_kernel_atan:
+	fmul	$at, $a0, $a0
+	li	$s0, 0x3d75e7c5 #  1/13
+	fmul	$v0, $s0, $at
+	li	$s0, 0xbdb7d66e # -1/11
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0x3de38e38 #  1/9
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0xbe124925 # -1/7
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0x3e4ccccd #  1/5
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0xbeaaaaaa # -1/3
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	llw	$s0, (_ONE)     #  1/1
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $a0
+	jr	$ra
+
+# ok (atan.s)
+# float -> float
+min_caml_atan:
+	sll	$s6, $a0, 1
+	srl	$s6, $s6, 1
+	li	$s0, 0x3ee00000 # 0.4375
+	fslt	$at, $s6, $s0
+	bne	$at, $zero, min_caml_kernel_atan
+	srl	$s7, $a0, 31
+	sw	$ra, 0($sp)
+	li	$s1, 0x401c0000 # 2.4375
+	fslt	$at, $s6, $s1
+	beq	$at, $zero, _atan_ge_24375
+	sll	$s7, $s7, 31
+	llw	$s2, (_ONE)
+	fadd	$s4, $s6, $s2
+	finv	$s4, $s4
+	fneg	$s2, $s2
+	fadd	$a0, $s6, $s2
+	fmul	$a0, $a0, $s4
+	jal	min_caml_kernel_atan
+	llw	$s0, (_qPI)
+	j	_min_caml_atan_end
+_atan_ge_24375:
+	finv	$a0, $s6
+	jal	min_caml_kernel_atan
+	fneg	$v0, $v0
+	llw	$s0, (_hPI)
+_min_caml_atan_end:
+	lw	$ra, 0($sp)
+	fadd	$v0, $v0, $s0
+	add	$v0, $v0, $s7
+	jr	$ra
