@@ -164,6 +164,7 @@ _create_array_loop:
 _create_array_end:
 	jr	$ra
 
+
 # trig
 
 # ok (trig.s)
@@ -188,41 +189,6 @@ _reduction_endif:
 	fslt	$at, $a0, $s1
 	beq	$at, $zero, _reduction_loop_sub
 	move	$v0, $a0
-	jr	$ra
-
-# ok (trig.s)
-# float -> int -> float
-min_caml_kernel_sin:
-	fmul	$at, $a0, $a0   #  $at = x^2
-	li	$s0, 0xb94d64b6 # -1/7!
-	fmul	$v0, $s0, $at
-	li	$s0, 0x3c088666 #  1/5!
-	fadd	$v0, $v0, $s0
-	fmul	$v0, $v0, $at
-	li	$s0, 0xbe2aaaac # -1/3!
-	fadd	$v0, $v0, $s0
-	fmul	$v0, $v0, $at
-	llw	$s0, (_ONE)     #  1/1!
-	fadd	$v0, $v0, $s0
-	fmul	$v0, $v0, $a0
-	add	$v0, $v0, $s7   #  SIGN
-	jr	$ra
-
-# ok (trig.s)
-# float -> int -> float
-min_caml_kernel_cos:
-	fmul	$at, $a0, $a0   #  $at = x^2
-	li	$s0, 0xbab38106 # -1/6!
-	fmul	$v0, $s0, $at
-	li	$s0, 0x3d2aa789 #  1/4!
-	fadd	$v0, $v0, $s0
-	fmul	$v0, $v0, $at
-	li	$s0, 0xbf000000 # -1/2!
-	fadd	$v0, $v0, $s0
-	fmul	$v0, $v0, $at
-	llw	$s0, (_ONE)     #  1/0!
-	fadd	$v0, $v0, $s0
-	add	$v0, $v0, $s7   #  SIGN
 	jr	$ra
 
 # ok (sin.s)
@@ -252,12 +218,25 @@ _sin_lt_pi:
 _sin_lt_hpi:
 	llw	$s3, (_qPI)
 	fslt	$at, $s3, $a0
-	beq	$at, $zero, _sin_le_qpi
+	beq	$at, $zero, min_caml_kernel_sin
 	fneg	$at, $a0
 	fadd	$a0, $at, $s2
-	j	min_caml_kernel_cos
-_sin_le_qpi:
-	j	min_caml_kernel_sin
+# ok (trig.s)
+# float -> int -> float
+min_caml_kernel_cos:
+	fmul	$at, $a0, $a0   #  $at = x^2
+	li	$s0, 0xbab38106 # -1/6!
+	fmul	$v0, $s0, $at
+	li	$s0, 0x3d2aa789 #  1/4!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0xbf000000 # -1/2!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	llw	$s0, (_ONE)     #  1/0!
+	fadd	$v0, $v0, $s0
+	add	$v0, $v0, $s7   #  SIGN
+	jr	$ra
 
 # ok (cos.s)
 # ok (trig.s) (2ulp error)
@@ -287,12 +266,26 @@ _cos_lt_hpi:
 	sll	$s7, $s7, 31
 	llw	$s3, (_qPI)
 	fslt	$at, $s3, $a0
-	beq	$at, $zero, _cos_le_qpi
+	beq	$at, $zero, min_caml_kernel_cos
 	fneg	$at, $a0
 	fadd	$a0, $at, $s2
-	j	min_caml_kernel_sin
-_cos_le_qpi:
-	j	min_caml_kernel_cos
+# ok (trig.s)
+# float -> int -> float
+min_caml_kernel_sin:
+	fmul	$at, $a0, $a0   #  $at = x^2
+	li	$s0, 0xb94d64b6 # -1/7!
+	fmul	$v0, $s0, $at
+	li	$s0, 0x3c088666 #  1/5!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	li	$s0, 0xbe2aaaac # -1/3!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $at
+	llw	$s0, (_ONE)     #  1/1!
+	fadd	$v0, $v0, $s0
+	fmul	$v0, $v0, $a0
+	add	$v0, $v0, $s7   #  SIGN
+	jr	$ra
 
 # ok (atan.s)
 # float -> float
