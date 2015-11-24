@@ -16,7 +16,7 @@ end entity;
 architecture struct of cpu is
 	type regfile_t is
 		array(0 to 31) of std_logic_vector(31 downto 0);
-	
+
 	type fetch_reg_t is record
 		pc   : std_logic_vector(31 downto 0);
 		npc  : std_logic_vector(31 downto 0);
@@ -295,7 +295,7 @@ begin
 		v.m.fpu_we3 := r.m.fpu_we2;
 		v.m.fpu_we4 := r.m.fpu_we3;
 		v.m.fpu_we5 := r.m.fpu_we4;
-		if r.m.fpu_we1 = '1' then
+		if r.m.fpu_we5 = '1' then
 			v.regfile(conv_integer(r.m.reg_c5)) := cpu_in.fpu_data;
 		end if;
 		if r.e.rx_go = '1' then
