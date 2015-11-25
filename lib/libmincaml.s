@@ -400,3 +400,28 @@ _min_caml_atan_end:
 	fadd	$v0, $v0, $s0
 	add	$v0, $v0, $s7
 	jr	$ra
+
+
+# util
+
+# ok (divu10.s)
+# unsigned int -> unsigned int
+min_caml_divu10:
+	srl	$v0, $a0, 1
+	srl	$at, $v0, 1
+	add	$v0, $v0, $at
+	srl	$at, $v0, 4
+	add	$v0, $v0, $at
+	srl	$at, $v0, 8
+	add	$v0, $v0, $at
+	srl	$at, $v0, 16
+	add	$v0, $v0, $at
+	srl	$v0, $v0, 3
+	sll	$at, $v0, 2
+	add	$s0, $v0, $at
+	sll	$s0, $s0, 1
+	sub	$s0, $a0, $s0
+	li	$at, 9
+	slt	$at, $at, $s0
+	add	$v0, $v0, $at
+	jr	$ra
