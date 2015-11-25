@@ -42,11 +42,23 @@ min_caml_recv32:
 	rrb	$v0
 	jr	$ra
 
+# unit -> unit
+min_caml_print_newline:
+	li	$at, 0x0a
+	rsb	$at
+	jr	$ra
+
 # ok (print.s)
 # char -> unit
 min_caml_print_byte:
 min_caml_print_char:
 	rsb	$a0
+	jr	$ra
+
+# unit -> char
+min_caml_read_byte:
+min_caml_read_char:
+	rrb	$v0
 	jr	$ra
 
 # only work when 0 <= x <= 9 (print.s)
@@ -56,7 +68,7 @@ min_caml_print_int:
 	rsb	$a0
 	jr	$ra
 
-# ok (read.s)
+# ok (read-int.s)
 # unit -> int
 min_caml_read_int:
 	li	$s0, 0
