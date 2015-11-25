@@ -44,6 +44,7 @@ min_caml_recv32:
 
 # ok (print.s)
 # char -> unit
+min_caml_print_byte:
 min_caml_print_char:
 	rsb	$a0
 	jr	$ra
@@ -112,6 +113,7 @@ min_caml_fsqr:
 
 # ok (float.s)
 # float -> float
+min_caml_abs_float:
 min_caml_fabs:
 	sll	$v0, $a0, 1
 	srl	$v0, $v0, 1
@@ -152,6 +154,7 @@ min_caml_floor:
 
 # not tested!!
 # int -> 'a -> 'a array
+min_caml_create_float_array:
 min_caml_create_array:
 	move	$s0, $gp
 	move	$v0, $gp
