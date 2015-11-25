@@ -56,6 +56,45 @@ min_caml_print_int:
 	rsb	$a0
 	jr	$ra
 
+# ok (read.s)
+# unit -> int
+min_caml_read_int:
+	li	$s0, 0
+	li	$s1, 0x2d # '-'
+	li	$s2, 0x30 # '0'
+	li	$s3, 0x3a # '9'+1
+_read_int_loop1:
+	rrb	$s0
+	bne	$s0, $s1, _read_int_not_negative_flag
+	slt	$at, $s0, $s2
+	li	$s7, 1
+	li	$v0, 0
+	j	_read_int_loop2
+_read_int_not_negative_flag:
+	bne	$at, $zero, _read_int_loop1
+	slt	$at, $s0, $s3
+	beq	$at, $zero, _read_int_loop1
+	li	$s7, 0
+	subi	$v0, $s0, 0x30
+_read_int_loop2:
+	rrb	$s0
+	slt	$at, $s0, $s2
+	bne	$at, $zero, _read_int_end
+	slt	$at, $s0, $s3
+	beq	$at, $zero, _read_int_end
+	subi	$s0, $s0, 0x30
+	sll	$at, $v0, 3
+	sll	$v0, $v0, 1
+	add	$v0, $v0, $at
+	add	$v0, $v0, $s0
+	j	_read_int_loop2
+_read_int_end:
+	beq	$s7, $zero, _read_int_positive
+	nop
+	sub	$v0, $zero, $v0
+_read_int_positive:
+	jr	$ra
+
 
 # float
 
