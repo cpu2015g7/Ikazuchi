@@ -20,17 +20,26 @@ architecture struct of fpu is
 	signal fmulc : std_logic_vector(31 downto 0);
 	signal finvc : std_logic_vector(31 downto 0);
 	signal fsqrtc : std_logic_vector(31 downto 0);
+	signal f2ic : std_logic_vector(31 downto 0);
+	signal i2fc : std_logic_vector(31 downto 0);
+	signal flrc : std_logic_vector(31 downto 0);
 	signal funct : std_logic_vector(5 downto 0);
 begin
 	fadd_1 : entity work.fadd  port map (a, b, faddc);
 	fmul_1 : entity work.fmul  port map (a, b, fmulc);
 	finv_1 : entity work.finv  port map (a, finvc);
 	fsqrt_1: entity work.fsqrt port map (a, fsqrtc);
+	f2i_1: entity work.f2i port map (a, f2ic);
+	i2f_1: entity work.i2f port map (a, i2fc);
+	flr_1: entity work.flr port map (a, flrc);
 
 	fpu_out.data_c <= faddc  when funct = FPU_FADD  else
 					  fmulc  when funct = FPU_FMUL  else
 					  finvc  when funct = FPU_FINV  else
 					  fsqrtc when funct = FPU_FSQRT else
+					  f2ic when funct = FPU_F2I else
+					  i2fc when funct = FPU_I2F else
+					  flrc when funct = FPU_FLR else
 					  x"7fffffff";
 	comb : process(clk, fpu_in) is
 	begin

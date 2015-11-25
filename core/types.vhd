@@ -45,7 +45,7 @@ package types is
 		data_c => (others => '0'),
 		data_res => (others => '0')
 	);
-	
+
 	-- alu
 	type alu_in_t is record
 		funct  : std_logic_vector(5 downto 0);
@@ -133,9 +133,12 @@ package types is
 	constant ALU_F2I  : std_logic_vector(5 downto 0) := "101101";
 	constant ALU_I2F  : std_logic_vector(5 downto 0) := "101110";
 	constant ALU_FLR  : std_logic_vector(5 downto 0) := "101111";
-	
+
 	constant FPU_FADD : std_logic_vector(5 downto 0) := "100000";
 	constant FPU_FMUL : std_logic_vector(5 downto 0) := "000001";
 	constant FPU_FINV : std_logic_vector(5 downto 0) := "000011";
 	constant FPU_FSQRT: std_logic_vector(5 downto 0) := "011000";
+	constant FPU_F2I  : std_logic_vector(5 downto 0) := "101101";
+	constant FPU_I2F  : std_logic_vector(5 downto 0) := "101110";
+	constant FPU_FLR  : std_logic_vector(5 downto 0) := "101111";
 end package;

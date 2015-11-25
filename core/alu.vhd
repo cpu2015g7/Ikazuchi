@@ -14,13 +14,8 @@ entity alu is
 end entity;
 
 architecture struct of alu is
-		signal f2ic : std_logic_vector(31 downto 0);
-		signal i2fc : std_logic_vector(31 downto 0);
 begin
-	f2i_1: entity work.f2i port map (alu_in.data_a, f2ic);
-	i2f_1: entity work.i2f port map (alu_in.data_a, i2fc);
-
-	comb : process(alu_in, f2ic, i2fc) is
+	comb : process(alu_in) is
 		variable a : std_logic_vector(31 downto 0);
 		variable b : std_logic_vector(31 downto 0);
 		variable c : std_logic_vector(31 downto 0);
@@ -117,12 +112,6 @@ begin
 				end if;
 			when ALU_FNEG =>
 				c := a xor x"80000000";
-			when ALU_F2I =>
-				c := f2ic;
-			when ALU_I2F =>
-				c := i2fc;
-			when ALU_FLR =>
-				c := x"00000000"; -- not implemented
 			when others => c := x"00000000";
 		end case;
 
