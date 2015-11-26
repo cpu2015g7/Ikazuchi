@@ -237,7 +237,7 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 		string reg, addr_l;
 		ss >> reg >> addr_l;
 		reg2i(reg);
-		return "001101" + reg + "00000" + i2b(label[addr_l], 16);
+		return "00110100000" + reg + i2b(label[addr_l], 16);
 	}
 	const asm_t &as = asmb[op];
 
