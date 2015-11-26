@@ -249,6 +249,7 @@ min_caml_sqrt:
 
 # ok (float.s)
 # float -> int
+min_caml_truncate:
 min_caml_int_of_float:
 	f2i	$v0, $a0
 	jr	$ra
