@@ -6,6 +6,9 @@ _ONE:   # 1.0
 _TWO:	# 2.0
 	.long	0x40000000
 
+_iTEN:	# 0.1
+	.long	0x3dcccccd
+
 _qPI:	# PI/4
 	.long	0x3f490fdb
 _hPI:	# PI/2
@@ -20,6 +23,7 @@ _dPI:	# 2*PI
 
 # ok (recv_send.s)
 # 'a -> unit
+min_caml_print_float:
 min_caml_send32:
 	srl	$s0, $a0, 24
 	rsb	$s0
@@ -119,9 +123,9 @@ _read_int_loop2:
 	bne	$at, $zero, _read_int_end
 	slt	$at, $s0, $s3
 	beq	$at, $zero, _read_int_end
-	subi	$s0, $s0, 0x30
 	sll	$at, $v0, 3
 	sll	$v0, $v0, 1
+	subi	$s0, $s0, 0x30
 	add	$v0, $v0, $at
 	add	$v0, $v0, $s0
 	j	_read_int_loop2
@@ -130,6 +134,42 @@ _read_int_end:
 	nop
 	sub	$v0, $zero, $v0
 _read_int_positive:
+	jr	$ra
+
+# ok (read_float.s) (1ulp error)
+# only work in case of %d or %d.%1u
+# unit -> float
+min_caml_read_float:
+	sw	$ra, 0($sp)
+	addi	$sp, $sp, -1
+	jal	min_caml_read_int
+	#rsb	$s0
+	li	$s4, 0x2e # '.'
+	bne	$s0, $s4, _read_float_int
+	move	$s6, $zero
+	rrb	$s0
+	slt	$at, $s0, $s2
+	bne	$at, $zero, _read_float_int
+	slt	$at, $s0, $s3
+	beq	$at, $zero, _read_float_int
+	subi	$s0, $s0, 0x30
+	sll	$s5, $v0, 1
+	sll	$v0, $v0, 3
+	beq	$s7, $zero, _read_float_positive
+	add	$v0, $v0, $s5
+	sub	$s0, $zero, $s0
+_read_float_positive:
+	add	$v0, $v0, $s0
+	i2f	$v0, $v0
+	llw	$s7, (_iTEN)
+	fmul	$v0, $v0, $s7
+	addi	$sp, $sp, 1
+	lw	$ra, 0($sp)
+	jr	$ra
+_read_float_int:
+	i2f	$v0, $v0
+	addi	$sp, $sp, 1
+	lw	$ra, 0($sp)
 	jr	$ra
 
 
