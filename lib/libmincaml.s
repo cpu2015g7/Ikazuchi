@@ -61,11 +61,36 @@ min_caml_read_char:
 	rrb	$v0
 	jr	$ra
 
-# only work when 0 <= x <= 9 (print.s)
+# ok (loop_back_int.s)
 # int -> unit
 min_caml_print_int:
-	addi	$a0, $a0, 0x30
-	rsb	$a0
+	beq	$a0, $zero, min_caml_print_int_rec_end
+	slt	$at, $a0, $zero
+	beq	$at, $zero, _print_int_rec
+	li	$s6, 10
+	li	$at, 0x2d # '-'
+	rsb	$at
+	sub	$a0, $zero, $a0
+_print_int_rec:
+	slt	$at, $a0, $s6
+	bne	$at, $zero, _print_int_rec_end
+	nop
+	addi	$sp, $sp, -2
+	sw	$ra, 2($sp)
+	jal	min_caml_divu10
+	sll	$s0, $v0, 1
+	sll	$s1, $v0, 3
+	sub	$s2, $a0, $s0
+	sub	$s2, $s2, $s1
+	sw	$s2, 1($sp)
+	move	$a0, $v0
+	jal	_print_int_rec
+	lw	$a0, 1($sp)
+	lw	$ra, 2($sp)
+	addi	$sp, $sp, 2
+_print_int_rec_end:
+	addi	$v0, $a0, 0x30
+	rsb	$v0
 	jr	$ra
 
 # ok (read-int.s)
@@ -405,6 +430,7 @@ _min_caml_atan_end:
 # util
 
 # ok (divu10.s)
+# Do NOT change $a0
 # unsigned int -> unsigned int
 min_caml_divu10:
 	srl	$v0, $a0, 1
