@@ -194,10 +194,10 @@ min_caml_float_of_int:
 	i2f	$v0, $a0
 	jr	$ra
 
-# not implemented
+# not tested
 # float -> float
 min_caml_floor:
-#	flr	$v0, $a0
+	flr	$v0, $a0
 	jr	$ra
 
 
