@@ -237,6 +237,7 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 		string reg, addr_l;
 		ss >> reg >> addr_l;
 		reg2i(reg);
+		assert(label.count(addr_l));
 		return "00110100000" + reg + i2b(label[addr_l], 16);
 	}
 	const asm_t &as = asmb[op];
@@ -252,6 +253,7 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 			if(i==2) r[i] = i2b(label[r[i]]-addr-1, 16);
 			else reg2i(r[i]);
 		} else if(as.form == "J"){
+			assert(label.count(r[i]));
 			r[i] = i2b(label[r[i]], 26);
 		} else (i < as.r_num ? reg2i : static_cast<void (*)(string &)>(d2b))(r[i]);
 	}
