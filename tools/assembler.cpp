@@ -238,6 +238,7 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 		ss >> reg >> addr_l;
 		reg2i(reg);
 		assert(label.count(addr_l));
+		assert(label[addr_l]<1<<16);
 		return "00110100000" + reg + i2b(label[addr_l], 16);
 	}
 	const asm_t &as = asmb[op];
