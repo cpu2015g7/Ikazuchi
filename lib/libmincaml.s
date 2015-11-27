@@ -68,7 +68,7 @@ min_caml_read_char:
 # ok (loop_back_int.s)
 # int -> unit
 min_caml_print_int:
-	beq	$a0, $zero, min_caml_print_int_rec_end
+	beq	$a0, $zero, _print_int_rec_end
 	slt	$at, $a0, $zero
 	beq	$at, $zero, _print_int_rec
 	li	$s6, 10
