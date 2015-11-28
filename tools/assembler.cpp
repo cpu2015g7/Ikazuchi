@@ -341,7 +341,7 @@ int run(int argc, char *argv[]){
 		init_inst(command, addr, label, dlabel, inst, dstr, tmode);
 	}
 	for(int i = 0; i < inst.size(); i++){
-		if(dump_enable) cerr << hex << setw(5) << setfill('0') <<  i << ": " << assemble(inst[i], i, label) + " # " + inst[i] << endl;
+		if(dump_enable) cerr << "0x" << hex << setw(5) << setfill('0') <<  i << ": " << assemble(inst[i], i, label) + " # " + inst[i] << endl;
 		fout << assemble(inst[i], i, label) + "\n";
 	}
 	return 0;
