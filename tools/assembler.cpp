@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <iomanip>
 #include <map>
 #include <set>
 #include <vector>
@@ -251,8 +252,11 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 		} else if(i >= as.r_num && as.form == "R"){
 			d2b(r[i], 5);
 		} else if(as.form == "B"){
-			if(i==2) r[i] = i2b(label[r[i]]-addr-1, 16);
-			else reg2i(r[i]);
+			if(i==2){
+				if(!label.count(r[i])) cerr<<label[r[i]]<<" "<<addr<<endl;
+				assert(label.count(r[i]));
+				r[i] = i2b(label[r[i]]-addr-1, 16);
+			} else reg2i(r[i]);
 		} else if(as.form == "J"){
 			assert(label.count(r[i]));
 			r[i] = i2b(label[r[i]], 26);
@@ -337,7 +341,7 @@ int run(int argc, char *argv[]){
 		init_inst(command, addr, label, dlabel, inst, dstr, tmode);
 	}
 	for(int i = 0; i < inst.size(); i++){
-		if(dump_enable) cerr << assemble(inst[i], i, label) + " # " + inst[i] << endl;
+		if(dump_enable) cerr << hex << setw(5) << setfill('0') <<  i << ": " << assemble(inst[i], i, label) + " # " + inst[i] << endl;
 		fout << assemble(inst[i], i, label) + "\n";
 	}
 	return 0;
