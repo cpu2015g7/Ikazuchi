@@ -18,14 +18,18 @@ struct asm_t {
 	asm_t() { asm_t(0, 0, "", "", "", ""); }
 };
 
+# define MAX_LINE 10000000
+
 map<string, string> reg;
 map<string, asm_t> asmb;
 set<string> nop_f, nop_o;
 bool dump_enable = false;
+bool dump_bin_enable = false;
 bool add_nop = true;
 int alu_nop = 0;
 int fpu_nop = 8;
 int other_nop = 4;
+int addr_line[MAX_LINE];
 
 void remove_comment(string &cmd){
 	for(int i = 0; i < cmd.size(); i++) if(cmd[i] == '#') {cmd = cmd.substr(0, i); break;};
@@ -234,6 +238,9 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 	if(op == "hlt"){
 		return "11110000000000000000000000000000";
 	}
+	if (op == "brk"){
+		return "11101100000000000000000000000000";
+	}
 	if(op == "la"){
 		string reg, addr_l;
 		ss >> reg >> addr_l;
@@ -323,6 +330,8 @@ int run(int argc, char *argv[]){
 		if(!strcmp(argv[i], "-o")) out_name = argv[++i];
 		if(!strcmp(argv[i], "--dump")) dump_enable = true;
 		if(!strcmp(argv[i], "--nodump")) dump_enable = false;
+		if(!strcmp(argv[i], "--bin")) dump_bin_enable = true;
+		if(!strcmp(argv[i], "--nobin")) dump_bin_enable = false;
 		if(!strcmp(argv[i], "--nop")) add_nop = true;
 		if(!strcmp(argv[i], "--nonop")) add_nop = false;
 	}
@@ -332,16 +341,23 @@ int run(int argc, char *argv[]){
 	ofstream fout(out_name);
 
 	string command;
-	int addr = 0;
+	int addr = 0, addri = 0;
+	int line = 1;
 	map<string, int> label, dlabel;
 	string dstr;
 	bool tmode = true;
 	vector<string> inst;
 	while(getline(fin, command)){
 		init_inst(command, addr, label, dlabel, inst, dstr, tmode);
+		while(addri <= addr) addr_line[addri++] = line;
+		line++;
 	}
 	for(int i = 0; i < inst.size(); i++){
-		if(dump_enable) cerr << "0x" << hex << setw(5) << setfill('0') <<  i << ": " << assemble(inst[i], i, label) + " # " + inst[i] << endl;
+		if(dump_enable){
+			cerr << "0x" << hex << setw(5) << setfill('0') <<  i << " -> " << dec << setw(6) << setfill(' ') << addr_line[i];
+			if(dump_bin_enable) cerr << ": " << assemble(inst[i], i, label);
+			cerr<< " # " + inst[i] << endl;
+		}
 		fout << assemble(inst[i], i, label) + "\n";
 	}
 	return 0;
