@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <map>
 #include <string>
 #include <string.h>
@@ -33,9 +35,12 @@ int main(int argc, char *argv[]){
 	}
 	init();
 	string s;
+	int i = 0;
 	while(cin >> s){
 		assert(s.size()==32);
-		string t = "\t";
+		stringstream ss;
+		ss << setw(5) << i;
+		string t = "\t" + ss.str() + " => ";
 		if(hex){
 			t += "x\"";
 		   	for(int i = 0; i < 8; i++) t += b2h[s.substr(4*i, 4)];
@@ -43,8 +48,9 @@ int main(int argc, char *argv[]){
 		}
 		else t += "\"" + s + "\",";
 		cout << t << endl;
+		i++;
 	}
 	cout << "\tothers => (others => '0')" << endl;
-	
+
 	return 0;
 }
