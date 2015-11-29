@@ -349,7 +349,7 @@ int run(int argc, char *argv[]){
 	vector<string> inst;
 	while(getline(fin, command)){
 		init_inst(command, addr, label, dlabel, inst, dstr, tmode);
-		while(addri <= addr) addr_line[addri++] = line;
+		while(addri < addr) addr_line[addri++] = line;
 		line++;
 	}
 	for(int i = 0; i < inst.size(); i++){
