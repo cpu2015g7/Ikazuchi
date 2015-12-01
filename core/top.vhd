@@ -61,8 +61,8 @@ begin
 	cpu_1 : entity work.cpu port map (clk, rst, cpu_in, cpu_out);
 	alu_1 : entity work.alu port map (clk, rst, alu_in, alu_out);
 	fpu_1 : entity work.fpu port map (clk, rst, fpu_in, fpu_out);
-	sram_1 : entity work.sram_sim port map (clk, sram_in, sram_out, zd, za, xwa);
---	sram_1 : entity work.sram port map (clk, sram_in, sram_out, zd, za, xwa);
+--	sram_1 : entity work.sram_sim port map (clk, sram_in, sram_out, zd, za, xwa);
+	sram_1 : entity work.sram port map (clk, sram_in, sram_out, zd, za, xwa);
 	rx_1 : entity work.rx generic map (wtime) port map(clk, rx_data, rx_ready, rx_done, RS_RX);
 	tx_1 : entity work.tx generic map (wtime) port map(clk, tx_data, tx_go, tx_busy, RS_TX);
 
