@@ -211,7 +211,7 @@ begin
 				v.d.data_c := (others => '0');
 			when OP_J | OP_JAL =>
 				v.d.data_a := (others => '0');
-				v.d.data_b := v.d.pc + 4;
+				v.d.data_b := v.d.pc + 1;
 				v.d.reg_c := "11111";
 			when others =>
 				v.d.reg_b := "00000";
@@ -255,14 +255,14 @@ begin
 
 		v.f.pc := r.f.npc;
 		if cpu_in.inst_data(31 downto 26) = OP_J or cpu_in.inst_data(31 downto 26) = OP_JAL then
-			v.f.npc := (r.f.npc(31 downto 28)&cpu_in.inst_data(25 downto 0)&"00");
+			v.f.npc := (r.f.npc(31 downto 26)&cpu_in.inst_data(25 downto 0));
 		elsif cpu_in.inst_data(31 downto 26) = OP_ALU and cpu_in.inst_data(5 downto 0) = FN_JR then
 			-- bug (reg_we will be expected to '0')
 			v.f.npc := v.regfile(conv_integer(cpu_in.inst_data(25 downto 21)));
 		elsif pc_src = '1' then
-			v.f.npc := (v.d.pc + (ext(v.d.data_b(15), 14)&v.d.data_b(15 downto 0)&"00")) + 4;
+			v.f.npc := (v.d.pc + (ext(v.d.data_b(15), 16)&v.d.data_b(15 downto 0))) + 1;
 		else
-			v.f.npc := r.f.npc + 4;
+			v.f.npc := r.f.npc + 1;
 		end if;
 		v.f.inst := cpu_in.inst_data;
 
@@ -295,8 +295,8 @@ begin
 		v.m.fpu_we3 := r.m.fpu_we2;
 		v.m.fpu_we4 := r.m.fpu_we3;
 		v.m.fpu_we5 := r.m.fpu_we4;
-		if r.m.fpu_we5 = '1' then
-			v.regfile(conv_integer(r.m.reg_c5)) := cpu_in.fpu_data;
+		if r.m.fpu_we4 = '1' then
+			v.regfile(conv_integer(r.m.reg_c4)) := cpu_in.fpu_data;
 		end if;
 		if r.e.rx_go = '1' then
 			v.regfile(conv_integer(r.e.reg_c))(7 downto 0) := cpu_in.rx_data;

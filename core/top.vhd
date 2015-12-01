@@ -46,7 +46,7 @@ architecture struct of top is
   signal sram_in : sram_in_t := sram_in_z;
   signal sram_out : sram_out_t := sram_out_z;
 -- test
-  signal rom : rom_t := fib_compiler;
+  signal rom : rom_t := minrt5;
   signal rx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal tx_data : std_logic_vector(7 downto 0) := (others => '0');
   signal rx_ready, rx_done, tx_go, tx_busy : std_logic := '0';
@@ -77,7 +77,7 @@ begin
 	cpu_in.rx_data <= rx_data;
 	cpu_in.alu_data <= alu_out.data_c;
 	cpu_in.fpu_data <= fpu_out.data_c;
-	cpu_in.inst_data <= rom(conv_integer(cpu_out.inst_addr(31 downto 2)));
+	cpu_in.inst_data <= rom(conv_integer(cpu_out.inst_addr(14 downto 0)));
 	cpu_in.mem_data <= sram_out.data;
 	sram_in.we <= cpu_out.mem_we;
 	sram_in.data <= cpu_out.data_c;
