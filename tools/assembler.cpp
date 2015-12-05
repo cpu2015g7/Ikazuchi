@@ -239,7 +239,7 @@ string assemble(string &cmd, int addr, map<string, int> &label){
 		return "11110000000000000000000000000000";
 	}
 	if (op == "brk"){
-		return "11101100000000000000000000000000";
+		return "11110100000000000000000000000000";
 	}
 	if(op == "la"){
 		string reg, addr_l;
