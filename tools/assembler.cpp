@@ -27,7 +27,7 @@ bool dump_enable = false;
 bool dump_bin_enable = false;
 bool add_nop = true;
 int alu_nop = 0;
-int fpu_nop = 8;
+int fpu_nop = 7;
 int other_nop = 4;
 int addr_line[MAX_LINE];
 
@@ -320,7 +320,7 @@ void init_setting(){
 	asmb["move"] = asm_t(2, 2, "I", "001101", "", "");
 
 	nop_f = set<string>({"fadd", "fmul", "finv", "fsqrt", "f2i", "i2f", "flr"});
-	nop_o = set<string>({"lw", "sw", "rsb", "rrb"});
+	nop_o = set<string>({"lw", "rsb", "rrb"});
 }
 
 int run(int argc, char *argv[]){
