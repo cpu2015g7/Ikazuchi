@@ -22,13 +22,14 @@ struct asm_t {
 
 map<string, string> reg;
 map<string, asm_t> asmb;
-set<string> nop_f, nop_o;
+set<string> nop_f, nop_o, nop_io;
 bool dump_enable = false;
 bool dump_bin_enable = false;
 bool add_nop = true;
-int alu_nop = 0;
+int alu_nop = 1;
 int fpu_nop = 7;
-int other_nop = 4;
+int other_nop = 5;
+int io_nop = 7;
 int addr_line[MAX_LINE];
 
 void remove_comment(string &cmd){
@@ -59,6 +60,7 @@ int num_nop(string &s){
 	if(s == "nop") return 0;
 	if(s == "beq" || s == "bne") return 0;
 	if(nop_f.find(s)!=nop_f.end()) return fpu_nop;
+	if(nop_io.find(s)!=nop_io.end()) return io_nop;
 	if(nop_o.find(s)!=nop_o.end()) return other_nop;
 	return alu_nop;
 }
@@ -137,9 +139,10 @@ int init_inst(string &cmd, int &addr, map<string, int> &lab, map<string, int> &d
 		decode_li(inst, addr, reg, data);
 		return 0;
 	}
+	string op = get_op(cmd);
+	if(add_nop && (op=="rsb" || op=="rrb")) push_nop(inst, addr, 7);
 	inst.push_back(cmd);
 	addr += 1;
-	string op = get_op(cmd);
 	if(add_nop) push_nop(inst, addr, num_nop(op));
 	return 0;
 }
@@ -320,7 +323,9 @@ void init_setting(){
 	asmb["move"] = asm_t(2, 2, "I", "001101", "", "");
 
 	nop_f = set<string>({"fadd", "fmul", "finv", "fsqrt", "f2i", "i2f", "flr"});
-	nop_o = set<string>({"lw", "rsb", "rrb"});
+	nop_o = set<string>({"lw"});
+	nop_io = set<string>({"rsb", "rrb"});
+	//nop_sw = set<string>({"sw"});
 }
 
 int run(int argc, char *argv[]){
