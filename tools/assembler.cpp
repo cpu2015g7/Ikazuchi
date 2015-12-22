@@ -28,7 +28,7 @@ bool dump_bin_enable = false;
 bool add_nop = true;
 int alu_nop = 1;
 int fpu_nop = 7;
-int other_nop = 5;
+int other_nop = 6;
 int io_nop = 7;
 int addr_line[MAX_LINE];
 
